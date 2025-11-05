@@ -4,18 +4,23 @@ import { Deck, DeckTypes } from "./deck";
 import { standardShuffler } from "../utils/random_utils";
 import * as _ from "lodash";
 
-export function createDrawDeck(existingCards?: Cards): Deck {
-  let cards = []
-  if (existingCards) {
-    cards = [...existingCards]
-  }
-  else {
-    cards = [
-      ...CardFactory.CreateNumberedCards(),
-      ...CardFactory.CreateColoredSpecialCards(),
-      ...CardFactory.CreateWildCards(),
-    ]
-  }
+// Draw Deck
+
+export function createNewDrawDeck(): Deck {
+  let cards = [
+    ...CardFactory.CreateNumberedCards(),
+    ...CardFactory.CreateColoredSpecialCards(),
+    ...CardFactory.CreateWildCards(),
+  ]
+  standardShuffler(cards)
+  return {
+    cards: cards,
+    type: DeckTypes.Draw,
+  };
+}
+
+export function createDrawDeck(existingCards: Cards): Deck {
+  let cards = [...existingCards]
 
   standardShuffler(cards)
   return {
@@ -24,6 +29,8 @@ export function createDrawDeck(existingCards?: Cards): Deck {
   };
 }
 
+// Discard Deck
+
 export function createDiscardDeck(card?: Card): Deck {
   if (!card) {
     return {
@@ -31,16 +38,21 @@ export function createDiscardDeck(card?: Card): Deck {
       type: DeckTypes.Discard,
     };
   }
-  
+
   return {
     cards: [card],
     type: DeckTypes.Discard,
   };
 }
 
+// Helpers
+
 export function createNewDecks(discardDeck: Deck): [Deck, Deck] {
-  let topCard = _.last(discardDeck.cards)!
+  let topCard = _.last(discardDeck.cards)
   let rest = _.initial(discardDeck.cards)
+
+  console.assert(!topCard, "discard Deck is empty when creating new Decks")
+  console.assert(rest.length == 0, "Draw Deck is empty when creating new Decks")
 
   let discard = createDiscardDeck(topCard)
   let draw = createDrawDeck(rest)
