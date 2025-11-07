@@ -3,15 +3,15 @@ import { CardNumber, Colors, allColors, Type, Card, Cards, numberValues } from "
 // Create a Single Card
 
 export function CreateNumberedCard(number: CardNumber, color: Colors): Card {
-  return { CardNumber: number, Color: color, Type: Type.Numbered };
+  return { CardNumber: number, Color: color, Type: Type.Numbered, Points: number };
 }
 
 export function CreateSpecialColoredCard(type: Type.Skip | Type.Reverse | Type.Draw, color: Colors): Card {
-  return { Type: type, Color: color };
+  return { Type: type, Color: color, Points: 20 };
 }
 
 export function CreateWildCard(type: Type.Wild | Type.WildDrawFour): Card {
-  return { Type: type };
+  return { Type: type, Points: 50 };
 }
 
 export function CreateDummyCard(): Card {

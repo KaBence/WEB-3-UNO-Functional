@@ -7,15 +7,18 @@ type NumberedCard = {
   readonly CardNumber: CardNumber;
   readonly Color: Colors;
   readonly Type: Type.Numbered;
+  readonly Points:number;
 };
 
 type SpecialColoredCard = {
   readonly Type: Type.Skip | Type.Reverse | Type.Draw;
   readonly Color: Colors;
+  readonly Points:number;
 };
 
 type WildCard = {
   readonly Type: Type.Wild | Type.WildDrawFour;
+  readonly Points:number;
 };
 
 type DummyCard = {
