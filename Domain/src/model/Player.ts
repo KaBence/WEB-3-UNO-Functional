@@ -1,6 +1,9 @@
 import * as _ from 'lodash';
 import type {Hand} from './Hand';
 
+export type PlayerId = number;
+export type PlayerRef = { id: PlayerId; name: string };
+
 export enum PlayerNames {
     player1 = 1,
     player2 =2,
