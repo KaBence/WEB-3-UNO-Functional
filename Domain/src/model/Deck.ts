@@ -10,11 +10,11 @@ type BaseDeck = {
     readonly cards: Cards;
 };
 
-export type DiscardDeck = BaseDeck & {
+type DiscardDeck = BaseDeck & {
     readonly type: DeckTypes.Discard;
 };
 
-export type DrawDeck = BaseDeck & {
+type DrawDeck = BaseDeck & {
     readonly type: DeckTypes.Draw;
 };
 

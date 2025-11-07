@@ -1,5 +1,5 @@
 import * as CardFactory from "./CardFactory";
-import { Cards, Card } from "./Card";
+import { Cards, Card , Type} from "./Card";
 import { Deck, DeckTypes } from "./deck";
 import { standardShuffler } from "../utils/random_utils";
 import * as _ from "lodash";
@@ -51,11 +51,13 @@ export function createNewDecks(discardDeck: Deck): [Deck, Deck] {
   let topCard = _.last(discardDeck.cards)
   let rest = _.initial(discardDeck.cards)
 
+  let filteredRest = rest.filter(card => card.Type !== Type.Dummy && card.Type !== Type.DummyDraw4)
+
   console.assert(!topCard, "discard Deck is empty when creating new Decks")
   console.assert(rest.length == 0, "Draw Deck is empty when creating new Decks")
 
   let discard = createDiscardDeck(topCard)
-  let draw = createDrawDeck(rest)
+  let draw = createDrawDeck(filteredRest)
   return [draw, discard]
 
 }
