@@ -14,12 +14,12 @@ export function CreateWildCard(type: Type.Wild | Type.WildDrawFour): Card {
   return { Type: type, Points: 50 };
 }
 
-export function CreateDummyCard(): Card {
-  return { Type: Type.Dummy }
+export function CreateDummyCard(color: Colors): Card {
+  return { Type: Type.Dummy ,Color: color }
 }
 
-export function CreateDummy4Card(): Card {
-  return { Type: Type.DummyDraw4 }
+export function CreateDummy4Card(color: Colors): Card {
+  return { Type: Type.DummyDraw4, Color: color }
 }
 
 // Create batches of Cards for Deck initilization

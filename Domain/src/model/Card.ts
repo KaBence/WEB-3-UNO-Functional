@@ -23,6 +23,7 @@ type WildCard = {
 
 type DummyCard = {
   readonly Type: Type.Dummy | Type.DummyDraw4;
+  readonly Color: Colors;
 };
 
 //Checks
