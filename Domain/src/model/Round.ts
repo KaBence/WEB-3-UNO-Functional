@@ -136,7 +136,7 @@ function catchUnoFailure(accuser: player.PlayerNames, accused: player.PlayerName
   return {...updated, statusMessage: message}
 }
 
-function canPlay(playedCard: Card, oldRound: Round): boolean { //we should add default and wtf why?
+function canPlay(playedCard: Card, oldRound: Round): boolean {
   const topCard = oldRound.topCard
     switch (playedCard.Type) {
       case card.Type.Reverse:
@@ -370,7 +370,7 @@ function addCardToDiscardPile(card: Card, round: Round): Round {
   return { ...round, discardPile, statusMessage: "Played: " + card.cardToString(card) }
 }
 
-function handleSpecialCards(opts: { playedCard: Card, color?: card.Colors }, round: Round): Round {  //we should add default
+function handleSpecialCards(opts: { playedCard: Card, color?: card.Colors }, round: Round): Round { 
   switch (opts.playedCard.Type) {
     case card.Type.Skip:
        return skip(round)
