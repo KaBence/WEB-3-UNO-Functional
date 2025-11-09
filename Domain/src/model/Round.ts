@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 
 import * as card from "./Card"
-import * as CardFactory from "./CardFactory"
+import * as cardFactory from "./CardFactory"
 import * as deck from "./Deck";
 import * as player from "./Player";
 import * as hand from "./Hand";
@@ -88,18 +88,13 @@ function getPlayersCard(player: player.PlayerNames, card: number, oldRound: Roun
   return getPlayerHand(oldRound,player)?.cards[card]
 }
 
-function roundHasEnded(oldRound: Round): boolean {
-  return oldRound.players.some((p) => p.hand.size === 0)
-}
-
-function getRoundWinner(oldRound: Round): Player | undefined {
-  const hasWinner = roundHasEnded(oldRound)
-  if(hasWinner){
+function getRoundWinner(oldRound: Round): Round {
+  if(oldRound.players.some((p) => p.hand.size === 0)){
     const winner = oldRound.players.find((p) => p.hand.size === 0)
     const statusMessage = winner.name + " Won the round!"
     return {...oldRound, winner: winner, statusMessage: statusMessage}
   }
-  return undefined
+  return oldRound
 }
 
 function getDrawDeckSize(oldRound: Round): number {
@@ -141,31 +136,43 @@ function catchUnoFailure(accuser: player.PlayerNames, accused: player.PlayerName
   return {...updated, statusMessage: message}
 }
 
-function canPlay(cardId: number, oldRound: Round): boolean {
-  const card = getPlayerHand(oldRound.currentPlayer, oldRound).cards[cardId];
-    switch (card.Type) {
+function canPlay(playedCard: Card, oldRound: Round): boolean { //we should add default and wtf why?
+  const topCard = oldRound.topCard
+    switch (playedCard.Type) {
       case card.Type.Reverse:
       case card.Type.Draw:
       case card.Type.Skip:
-        if (oldRound.topCard.Type === card.Type || oldRound.topCard.Color === card.Color) {
-          return true;
+        switch (topCard.Type){
+          case card.Type.Wild:
+          case card.Type.WildDrawFour:
+            return false;
+          case card.Type.Skip:
+          case card.Type.Reverse:
+          case card.Type.Draw:
+            return topCard.Type === playedCard.Type || topCard.Color === playedCard.Color
+          case card.Type.Numbered:
+          case card.Type.Dummy:
+          case card.Type.DummyDraw4:
+            return topCard.Color === playedCard.Color
         }
-        return false;
-
       case card.Type.Wild:
       case card.Type.WildDrawFour:
         return true;
-
       case card.Type.Numbered:
-        if (oldRound.topCard.CardNumber === card.CardNumber || oldRound.topCard.Color === card.Color){
-            return true;
+        switch (topCard.Type){
+          case card.Type.Skip:
+          case card.Type.Reverse:
+          case card.Type.Draw:
+          case card.Type.Dummy:
+          case card.Type.DummyDraw4:
+            return topCard.Color === playedCard.Color
+          case card.Type.Numbered:
+            return topCard.CardNumber === playedCard.CardNumber || topCard.Color === topCard.Color
+          case card.Type.Wild:
+          case card.Type.WildDrawFour:
         }
-        return false;
-
       case card.Type.Dummy:
       case card.Type.DummyDraw4:
-        return false
-      default:
         return false
     }
 }
@@ -264,7 +271,7 @@ function getPreviousPlayer(oldRound: Round): player.PlayerNames {
     return [false, {...newRound, statusMessage: message, currentPlayer: getNextPlayer(newRound)}];
   }
 
-  export function handleStartRound(oldRound: Round): Round {
+  export function handleStartRound(oldRound: Round): Round { //we can ad Bence's helper functions from play
     const currentCard = oldRound.topCard
 
     switch (currentCard.Type) {
@@ -290,7 +297,7 @@ function getPreviousPlayer(oldRound: Round): player.PlayerNames {
   }
 
   function setWildCard(color: card.Color, oldRound: Round): Round {
-    const newDiscardPile = deck.addCard(CardFactory.CreateDummyCard(color),oldRound.discardPile)
+    const newDiscardPile = deck.addCard(cardFactory.CreateDummyCard(color),oldRound.discardPile)
     return {...oldRound, discardPile: newDiscardPile}
   } 
 
@@ -330,4 +337,54 @@ function setUnoFalse(card: Card, oldPlayer: Player): [Card, Player] {
 
 function addCardToPlayersHand(card: Card, oldPlayer: Player): Player {
   return player.addCard(card, oldPlayer)
+}
+
+export function playIfAllowed(opts: { cardId: number, color?: card.Colors }, round: Round) {
+  const playedCard = getPlayersCard(round.currentPlayer, opts.cardId, round)! // has to remove the card
+  if (playedCard == undefined) { // has to change
+    console.log("I tried to take a card that doesn't exist, whoops")
+    return round
+  }
+  let color = opts.color
+  return canPlay(playedCard, round) ? play({ playedCard, color }, round) : round
+}
+
+function play(opts: { playedCard: Card, color?: card.Colors }, round: Round): Round {
+  const newRound = addCardToDiscardPile(opts.playedCard, round)
+  const handledSpecialCards = handleSpecialCards(opts,newRound)
+  return _.flow([skip, getRoundWinner])(handledSpecialCards)
+}
+
+function skip(round: Round): Round {
+  return { ...round, currentPlayer: getNextPlayer(round) }
+}
+
+function changeDirection(round: Round): Round {
+  const currentDirection = round.currentDirection === Direction.Clockwise ? Direction.CounterClockwise : Direction.Clockwise
+  const roundAfterSkip = round.players.length == 2 ? skip(round) : round
+  return { ...roundAfterSkip, currentDirection }
+}
+
+function addCardToDiscardPile(card: Card, round: Round): Round {
+  const discardPile = deck.addCard(card, round.discardPile)
+  return { ...round, discardPile, statusMessage: "Played: " + card.cardToString(card) }
+}
+
+function handleSpecialCards(opts: { playedCard: Card, color?: card.Colors }, round: Round): Round {  //we should add default
+  switch (opts.playedCard.Type) {
+    case card.Type.Skip:
+       return skip(round)
+    case card.Type.Reverse:
+      return changeDirection(round)
+    case card.Type.Draw:
+      return draw(2, round.currentPlayer, round)
+    case card.Type.Wild:
+      return addCardToDiscardPile(cardFactory.CreateDummyCard(opts.color!), round)
+    case card.Type.WildDrawFour:
+      return addCardToDiscardPile(cardFactory.CreateDummy4Card(opts.color!), round)
+    case card.Type.Numbered:
+    case card.Type.Dummy:
+    case card.Type.DummyDraw4:
+      return round;
+  }
 }
