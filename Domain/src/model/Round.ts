@@ -160,80 +160,108 @@ export function canPlay(playedCard: Card, oldRound: Round): boolean {
 }
 
 export function sayUno(playerId: player.PlayerNames, oldRound: Round): Round {
-  const specificPlayer = getSpecificPlayer(playerId, oldRound)
-  const playersHand = getPlayerHand(playerId, oldRound)
-  if (playersHand.length === 2) {
-    if (canPlay(0, oldRound) || canPlay(1, oldRound)) {
-      const newPlayer = player.setUno(true, specificPlayer)
-      const newPlayersArray = oldRound.players.map(p => p.id === newPlayer.id)
-      const message = specificPlayer.name + " called UNO!"
-      return { ...oldRound, players: newPlayersArray, statusMessage: message }
+    const specificPlayer = getSpecificPlayer(playerId, oldRound)
+    const playersHand = getPlayerHand(playerId, oldRound)
+    if (playersHand.length === 2) {
+      const card = [playersHand[0], playersHand[1]]
+      if (canPlay(card[0], oldRound) || canPlay(card[1], oldRound)) {
+        const newPlayer = player.setUno(true, specificPlayer)
+        const newPlayersArray = oldRound.players.map(p => p.id === newPlayer.id ? newPlayer : p)
+        const message = specificPlayer.name + " called UNO!"
+        return {...oldRound, players: newPlayersArray, statusMessage: message}
+      }
+      else {
+        const updated = draw(4,playerId,oldRound)
+        const message = specificPlayer.name + " called UNO and failed!"
+        return {...updated, statusMessage: message}
+      }
+    }
+    if (playersHand.length != 1) {
+        const updated = draw(4,playerId,oldRound)
+        const message = specificPlayer.name + " called UNO and failed!"
+      return {...updated, statusMessage: message}
+    }
+    const newPlayer = player.setUno(true, specificPlayer)
+    const newPlayersArray = oldRound.players.map(p => p.id === newPlayer.id ? newPlayer : p)
+    const message = specificPlayer.name + " called UNO!"
+    return {...oldRound, players: newPlayersArray, statusMessage: message}
+
+}
+
+function getNextPlayer(oldRound: Round): player.PlayerNames {
+    if (oldRound.currentDirection === Direction.Clockwise) {
+      const index = (oldRound.players.findIndex((p) => p.id === oldRound.currentPlayer) + 1) % oldRound.players.length
+      return oldRound.players[index].id
     }
     else {
-      const updated = draw(4, playerId, oldRound)
-      const message = specificPlayer.name + " called UNO and failed!"
-      return { ...updated, statusMessage: message }
+      const index = (oldRound.players.findIndex((p) => p.id === oldRound.currentPlayer) - 1 + oldRound.players.length) % oldRound.players.length
+      return oldRound.players[index].id
     }
-  }
-  if (playersHand.length != 1) {
-    const updated = draw(4, playerId, oldRound)
-    const message = specificPlayer.name + " called UNO and failed!"
-    return { ...updated, statusMessage: message }
-  }
-  const newPlayer = player.setUno(true, specificPlayer)
-  const newPlayersArray = oldRound.players.map(p => p.id === newPlayer.id)
-  const message = specificPlayer.name + " called UNO!"
-  return { ...oldRound, players: newPlayer, statusMessage: message }
-
 }
 
-export function getNextPlayer(oldRound: Round): player.PlayerNames {
-  if (oldRound.currentDirection === Direction.Clockwise) {
-    const index = (oldRound.players.findIndex((p) => p.playerName === oldRound.currentPlayer) + 1) % oldRound.players.length
-    return oldRound.players[index].playerName
-  }
-  else {
-    const index = (oldRound.players.findIndex((p) => p.playerName === oldRound.currentPlayer) - 1 + oldRound.players.length) % oldRound.players.length
-    return oldRound.players[index].playerName
-  }
-}
-
-export function getPreviousPlayer(oldRound: Round): player.PlayerNames {
-  if (oldRound.currentDirection === Direction.Clockwise) {
-    const index = (oldRound.players.findIndex((p) => p.playerName === oldRound.currentPlayer) - 1 + oldRound.players.length) % oldRound.players.length
-    return oldRound.players[index].playerName
-  }
-  else {
-    const index = (oldRound.players.findIndex((p) => p.playerName === oldRound.currentPlayer) + 1) % oldRound.players.length
-    return oldRound.players[index].playerName
-  }
-}
-
-export function couldPlayInsteadofDrawFour(oldRound: Round): boolean {
-  const hand = getPlayerHand(getPreviousPlayer(oldRound), oldRound).cards
-
-  for (let i = 0; i < hand.length; i++) {
-    switch (hand[i].Type) {
-      case card.Type.Reverse:
-      case card.Type.Draw:
-      case card.Type.Skip:
-        if (oldRound.topCard.Type === hand[i].Type || oldRound.topCard.Color === hand[i].Color) {
-          return true;
-        }
-        break;
-      case card.Type.Numbered:
-        if (oldRound.topCard.CardNumber === hand[i].CardNumber || oldRound.topCard.Color === hand[i].Color) {
-          return true;
-        }
-      case card.Type.Wild:
-      case card.Type.WildDrawFour:
-      case card.Type.Dummy:
-      case card.Type.DummyDraw4:
-        break;
+function getPreviousPlayer(oldRound: Round): player.PlayerNames {
+    if (oldRound.currentDirection === Direction.Clockwise) {
+      const index = (oldRound.players.findIndex((p) => p.id === oldRound.currentPlayer) - 1  + oldRound.players.length) % oldRound.players.length
+      return oldRound.players[index].id
     }
-  }
-  return false;
+    else {
+      const index = (oldRound.players.findIndex((p) => p.id === oldRound.currentPlayer) + 1) % oldRound.players.length
+      return oldRound.players[index].id
+    }
 }
+
+  function couldPlayInsteadofDrawFour(oldRound: Round): boolean {
+    const hand = getPlayerHand(getPreviousPlayer(oldRound), oldRound).cards;
+    const topCard = oldRound.topCard;
+    for (let i = 0; i < hand.length; i++) {
+      switch (hand[i].Type) {
+        case card.Type.Reverse:
+        case card.Type.Draw:
+        case card.Type.Skip:
+          switch (topCard.Type) {
+            case card.Type.Wild:
+            case card.Type.WildDrawFour:
+              break;
+            case card.Type.Skip:
+            case card.Type.Reverse:
+            case card.Type.Draw:
+              if(topCard.Type === hand[i].Type || topCard.Color === hand[i].Color)
+                return true
+              break;
+            case card.Type.Numbered:
+            case card.Type.Dummy:
+            case card.Type.DummyDraw4:
+              if(topCard.Color === hand[i].Color)
+                return true;
+              break;
+          }
+        case card.Type.Wild:
+        case card.Type.WildDrawFour:
+          break;
+        case card.Type.Numbered:
+          switch (topCard.Type) {
+            case card.Type.Skip:
+            case card.Type.Reverse:
+            case card.Type.Draw:
+            case card.Type.Dummy:
+            case card.Type.DummyDraw4:
+              if(topCard.Color === hand[i].Color)
+                return true;
+              break;
+            case card.Type.Numbered:
+              if(topCard.CardNumber === hand[i].CardNumber || topCard.Color === topCard.Color)
+                return true;
+              break;
+            case card.Type.Wild:
+            case card.Type.WildDrawFour:
+          }
+        case card.Type.Dummy:
+        case card.Type.DummyDraw4:
+          break;
+      }
+    }
+    return false
+  }
 
 export function challengeWildDrawFour(isChallenged: boolean, oldRound: Round): [boolean, Round] {
 
