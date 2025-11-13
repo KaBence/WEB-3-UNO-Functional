@@ -3,8 +3,9 @@ import type { Round } from "./Round";
 import * as RoundFactory from "./RoundFactory";
 import * as DeckFactory from "./DeckFactory";
 import type { PlayerId, PlayerRef } from "./Player";
+import * as playerFactory from "./PlayerFactory"
 import { flow } from "lodash";
-import { Card } from "./Card";
+import { Card, Type } from "./Card";
 import { Deck, deal, shuffle, DeckTypes } from "./Deck";
 import {
   start as roundStart,
@@ -57,14 +58,23 @@ export function removePlayer(playerId: PlayerId, g: Game): Game {
 
 
 export function selectDealerBy(g: Game): Game {
- const { dealer } = g.players.reduce(
+  const { dealer } = g.players.reduce(
     (state, _player, index) => {
       const [card, nextDeck] = deal(state.deck);
-      const score = card ? Card.Points : -Infinity;
-
-      return score > state.bestScore
-        ? { deck: nextDeck, bestScore: score, dealer: index }
-        : { ...state, deck: nextDeck };
+      switch (card!.Type) {
+        case Type.Skip:
+        case Type.Reverse:
+        case Type.Draw:
+        case Type.Wild:
+        case Type.WildDrawFour:
+        case Type.Numbered:
+          return card!.Points > state.bestScore
+            ? { deck: nextDeck, bestScore: card!.Points, dealer: index }
+            : { ...state, deck: nextDeck };
+        case Type.Dummy:
+        case Type.DummyDraw4:
+          return { ...state, deck: nextDeck };
+      }
     },
     {
       deck: DeckFactory.createNewDrawDeck(),
@@ -95,9 +105,10 @@ export function createRound(g: Game): Game {
 
   //  decide dealer on the Game
   const withDealer = chooseDealer(g);
+  const fullPlayers = g.players.map((ref)=> playerFactory.createPlayer(ref.id,ref.name))
 
   //  start a round based on players + dealer
-  const round = RoundFactory.createRound(withDealer.players, withDealer.dealer);
+  const round = RoundFactory.createNewRound(fullPlayers, withDealer.dealer);
 
   return {
     ...withDealer,

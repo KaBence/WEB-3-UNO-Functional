@@ -2,9 +2,9 @@ import * as _ from "lodash";
 
 import * as card from "./Card"
 import * as cardFactory from "./CardFactory"
-import * as deck from "./Deck";
+import * as deckFactory from "./DeckFactory"
+import * as deck from "./deck";
 import * as player from "./Player";
-import * as hand from "./Hand";
 
 export enum Direction {
   Clockwise = "clockwise",
@@ -14,7 +14,6 @@ export enum Direction {
 type Deck = deck.Deck;
 type Player = player.Player;
 type Card = card.Card;
-type Hand = hand.Hand;
 
 export type Round =  {
   readonly players: Player[];
@@ -28,7 +27,7 @@ export type Round =  {
 };
 
 export function initializeRound(players: Player[], dealer: number): Round {
-  let drawPile = deck.createNewDrawPile();
+  let drawPile = deckFactory.createNewDrawDeck();
 
   let playersWithCards = _.cloneDeep(players);
   let remainingDeck = _.cloneDeep(drawPile);
@@ -39,15 +38,13 @@ export function initializeRound(players: Player[], dealer: number): Round {
       const cardToDeal = deck.deal(remainingDeck);
 
       if (cardToDeal) {
-        newPlayers += player.addCard(p, cardToDeal); // Mutates the cloned player that is adding the card to players hand
+        newPlayers.push(player.addCardToPlayerHand(cardToDeal[0]!,p))  // Mutates the cloned player that is adding the card to players hand
       }
     });
   }
 
   drawPile = remainingDeck;
-
-  const topCard = deck.deal(drawPile);
-  const discardPile = [topCard];
+  const discardPile = deckFactory.createDiscardDeck(deck.deal(drawPile)[0])
 
   const initialState: Round = {
     players: playersWithCards,
@@ -55,7 +52,7 @@ export function initializeRound(players: Player[], dealer: number): Round {
     currentPlayer: (dealer + 1) % players.length,
     drawPile: drawPile,
     discardPile: discardPile,
-    topCard: topCard,
+    topCard: deck.peek(discardPile)[0]!,
     statusMessage: "A new round has begun!",
     winner: undefined,
   };
@@ -64,21 +61,12 @@ export function initializeRound(players: Player[], dealer: number): Round {
 };
 
 function getSpecificPlayer(player: player.PlayerNames, oldRound: Round): Player {
-  return oldRound.players.find((p) => p.playerName === player)
-}
-
-function getPlayerHand(player: player.PlayerNames, oldRound: Round): Hand | undefined {
-  return getSpecificPlayer(oldRound,player)?.hand
-}
-
-
-function getPlayersCard(player: player.PlayerNames, card: number, oldRound: Round): Card | undefined {
-  return getPlayerHand(oldRound,player)?.cards[card]
+  return oldRound.players.find((p) => p.id === player)!
 }
 
 function getRoundWinner(oldRound: Round): Round {
-  if(oldRound.players.some((p) => p.hand.size === 0)){
-    const winner = oldRound.players.find((p) => p.hand.size === 0)
+  if(oldRound.players.some((p) => p.hand.length === 0)){
+    const winner = oldRound.players.find((p) => p.hand.length === 0)!
     const statusMessage = winner.name + " Won the round!"
     return {...oldRound, winner: winner, statusMessage: statusMessage}
   }
@@ -89,7 +77,7 @@ function getRoundWinner(oldRound: Round): Round {
 function draw(noCards: number, playerId: player.PlayerNames, oldRound: Round): Round { //try to make it with _flow() to work on the same newst shit all the time
   let currentRoundState = oldRound;
   
-  const playerInfo = getSpecificPlayer(oldRound, playerId);
+  const playerInfo = getSpecificPlayer(playerId, oldRound);
   if (!playerInfo) {
     console.error("Cannot draw card for player who does not exist.");
     return oldRound; // Return original state if player not found
@@ -100,7 +88,7 @@ function draw(noCards: number, playerId: player.PlayerNames, oldRound: Round): R
     currentRoundState = dealFlow(playerId, currentRoundState)
   }
 
-  const finalState = {...currentRoundState, statusMessage: `${playerInfo.getName()} drew ${noCards} card(s).`}
+  const finalState = {...currentRoundState, statusMessage: `${playerInfo.name} drew ${noCards} card(s).`}
   
   return finalState;
 };
@@ -109,7 +97,7 @@ function catchUnoFailure(accuser: player.PlayerNames, accused: player.PlayerName
   const accusedPlayer = getSpecificPlayer(accused, oldRound)
   const message = getSpecificPlayer(accuser, oldRound).name + " accused " + getSpecificPlayer(accused, oldRound).name
 
-  if (!accusedPlayer.hasUno && accusedPlayer.hand.cards.length === 1) {
+  if (!accusedPlayer.unoCalled && accusedPlayer.hand.length === 1) {
     const updated = draw(4, accused, oldRound)
     const newMessage = message + " rightfully!"
     return {...updated, statusMessage: newMessage}
