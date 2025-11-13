@@ -32,13 +32,14 @@ export function initializeRound(players: Player[], dealer: number): Round {
 
   let playersWithCards = _.cloneDeep(players);
   let remainingDeck = _.cloneDeep(drawPile);
+  let newPlayers: Player[] = []
 
   for (let i = 0; i < 7; i++) {
     playersWithCards.forEach((p) => {
       const cardToDeal = deck.deal(remainingDeck);
 
       if (cardToDeal) {
-        player.addCard(p, cardToDeal); // Mutates the cloned player that is adding the card to players hand
+        newPlayers += player.addCard(p, cardToDeal); // Mutates the cloned player that is adding the card to players hand
       }
     });
   }
@@ -62,15 +63,6 @@ export function initializeRound(players: Player[], dealer: number): Round {
   return initialState;
 };
 
-
-function updateDrawPile(newDrawPile: Deck, oldRound: Round): Round {
-  return {...oldRound, drawPile: newDrawPile}
-}
-
-function updateDiscardPile(newDiscardPile: Deck, oldRound: Round): Round {
-  return {...oldRound, discardPile: newDiscardPile}
-}
-
 function getSpecificPlayer(player: player.PlayerNames, oldRound: Round): Player {
   return oldRound.players.find((p) => p.playerName === player)
 }
@@ -79,10 +71,6 @@ function getPlayerHand(player: player.PlayerNames, oldRound: Round): Hand | unde
   return getSpecificPlayer(oldRound,player)?.hand
 }
 
-function updateCurrentDirection(oldRound: Round): Round {
-  const newDirection = oldRound.currentDirection === Direction.Clockwise ? Direction.CounterClockwise : Direction.Clockwise;
-  return {...oldRound, currentDirection: newDirection}
-}
 
 function getPlayersCard(player: player.PlayerNames, card: number, oldRound: Round): Card | undefined {
   return getPlayerHand(oldRound,player)?.cards[card]
@@ -97,9 +85,6 @@ function getRoundWinner(oldRound: Round): Round {
   return oldRound
 }
 
-function getDrawDeckSize(oldRound: Round): number {
-  return deck.size(oldRound.drawPile)
-}
 
 function draw(noCards: number, playerId: player.PlayerNames, oldRound: Round): Round { //try to make it with _flow() to work on the same newst shit all the time
   let currentRoundState = oldRound;
@@ -122,18 +107,18 @@ function draw(noCards: number, playerId: player.PlayerNames, oldRound: Round): R
 
 function catchUnoFailure(accuser: player.PlayerNames, accused: player.PlayerNames, oldRound: Round): Round {
   const accusedPlayer = getSpecificPlayer(accused, oldRound)
-  let message = getSpecificPlayer(accuser, oldRound).name + " accused " + getSpecificPlayer(accused, oldRound).name
-  let updated = oldRound
+  const message = getSpecificPlayer(accuser, oldRound).name + " accused " + getSpecificPlayer(accused, oldRound).name
+
   if (!accusedPlayer.hasUno && accusedPlayer.hand.cards.length === 1) {
-    updated = draw(4, accused, oldRound)
-    message += " rightfully!"
+    const updated = draw(4, accused, oldRound)
+    const newMessage = message + " rightfully!"
+    return {...updated, statusMessage: newMessage}
   }
   else {
-    updated = draw(6, accuser, oldRound)
-    message += " wrongly"
+    const updated = draw(6, accuser, oldRound)
+    const newMessage = message + " wrongly"
+    return {...updated, statusMessage: newMessage}
   }
-
-  return {...updated, statusMessage: message}
 }
 
 function canPlay(playedCard: Card, oldRound: Round): boolean {
@@ -180,49 +165,51 @@ function canPlay(playedCard: Card, oldRound: Round): boolean {
 function sayUno(playerId: player.PlayerNames, oldRound: Round): Round {
     const specificPlayer = getSpecificPlayer(playerId, oldRound)
     const playersHand = getPlayerHand(playerId, oldRound)
-    let updated = undefined
-    let message = ""
     if (playersHand.length === 2) {
       if (canPlay(0, oldRound) || canPlay(1, oldRound)) {
-        player.setUno(true, specificPlayer)
-        message = specificPlayer.name + " called UNO!"
+        const newPlayer = player.setUno(true, specificPlayer)
+        const newPlayersArray = oldRound.players.map(p => p.id === newPlayer.id)
+        const message = specificPlayer.name + " called UNO!"
+        return {...oldRound, players: newPlayersArray, statusMessage: message}
       }
       else {
-        updated = draw(4,playerId,oldRound)
-        message = specificPlayer.name + " called UNO and failed!"
+        const updated = draw(4,playerId,oldRound)
+        const message = specificPlayer.name + " called UNO and failed!"
+        return {...updated, statusMessage: message}
       }
-      if (!updated) {
-        updated = oldRound
-      }
-      return {...updated, statusMessage: message}
     }
     if (playersHand.length != 1) {
-        updated = draw(4,playerId,oldRound)
-        message = specificPlayer.name + " called UNO and failed!"
+        const updated = draw(4,playerId,oldRound)
+        const message = specificPlayer.name + " called UNO and failed!"
       return {...updated, statusMessage: message}
     }
-    player.setUno(true, specificPlayer)
-    message = specificPlayer.name + " called UNO!"
-    return {...oldRound, statusMessage: message}
+    const newPlayer = player.setUno(true, specificPlayer)
+    const newPlayersArray = oldRound.players.map(p => p.id === newPlayer.id)
+    const message = specificPlayer.name + " called UNO!"
+    return {...oldRound, players:newPlayer, statusMessage: message}
 
 }
 
 function getNextPlayer(oldRound: Round): player.PlayerNames {
-    let index = 0;
-    if (oldRound.currentDirection === Direction.Clockwise)
-      index = (oldRound.players.findIndex((p) => p.playerName === oldRound.currentPlayer) + 1) % oldRound.players.length
-    else
-      index = (oldRound.players.findIndex((p) => p.playerName === oldRound.currentPlayer) - 1 + oldRound.players.length) % oldRound.players.length
-    return oldRound.players[index].playerName
+    if (oldRound.currentDirection === Direction.Clockwise) {
+      const index = (oldRound.players.findIndex((p) => p.playerName === oldRound.currentPlayer) + 1) % oldRound.players.length
+      return oldRound.players[index].playerName
+    }
+    else {
+      const index = (oldRound.players.findIndex((p) => p.playerName === oldRound.currentPlayer) - 1 + oldRound.players.length) % oldRound.players.length
+      return oldRound.players[index].playerName
+    }
 }
 
 function getPreviousPlayer(oldRound: Round): player.PlayerNames {
-    let index = 0;
-    if (oldRound.currentDirection === Direction.Clockwise)
-      index = (oldRound.players.findIndex((p) => p.playerName === oldRound.currentPlayer) - 1  + oldRound.players.length) % oldRound.players.length
-    else
-      index = (oldRound.players.findIndex((p) => p.playerName === oldRound.currentPlayer) + 1) % oldRound.players.length
-    return oldRound.players[index].playerName
+    if (oldRound.currentDirection === Direction.Clockwise) {
+      const index = (oldRound.players.findIndex((p) => p.playerName === oldRound.currentPlayer) - 1  + oldRound.players.length) % oldRound.players.length
+      return oldRound.players[index].playerName
+    }
+    else {
+      const index = (oldRound.players.findIndex((p) => p.playerName === oldRound.currentPlayer) + 1) % oldRound.players.length
+      return oldRound.players[index].playerName
+    }
 }
 
   function couldPlayInsteadofDrawFour(oldRound: Round): boolean {
@@ -252,22 +239,20 @@ function getPreviousPlayer(oldRound: Round): player.PlayerNames {
   }
 
   function challengeWildDrawFour(isChallenged: boolean, oldRound: Round): [boolean, Round] {
-    let newRound = undefined
-    let message = ""
 
     if (!isChallenged) {
-      newRound = draw(4, oldRound.currentPlayer, oldRound)
-      message = getSpecificPlayer(newRound.currentPlayer, newRound).name + " did not challenge"
+      const newRound = draw(4, oldRound.currentPlayer, oldRound)
+      const message = getSpecificPlayer(newRound.currentPlayer, newRound).name + " did not challenge"
       return [false, {...newRound, statusMessage: message, currentPlayer: getNextPlayer(newRound)}];
     }
 
     if (!couldPlayInsteadofDrawFour(oldRound)){
-      newRound = draw(4, getPreviousPlayer(oldRound), oldRound)
-      message = getSpecificPlayer(newRound.currentPlayer, newRound).name + " challenged successfully"
+      const newRound = draw(4, getPreviousPlayer(oldRound), oldRound)
+      const message = getSpecificPlayer(newRound.currentPlayer, newRound).name + " challenged successfully"
       return [true, {...newRound, statusMessage: message}];
     }
-    newRound = draw(6, oldRound.currentPlayer, oldRound)
-    message = getSpecificPlayer(newRound.currentPlayer, newRound).name + " challenged but failed"
+    const newRound = draw(6, oldRound.currentPlayer, oldRound)
+    const message = getSpecificPlayer(newRound.currentPlayer, newRound).name + " challenged but failed"
     return [false, {...newRound, statusMessage: message, currentPlayer: getNextPlayer(newRound)}];
   }
 
@@ -278,7 +263,7 @@ function getPreviousPlayer(oldRound: Round): player.PlayerNames {
       case card.Type.Skip:
         return {...oldRound, currentPlayer: getNextPlayer(oldRound)}
       case card.Type.Reverse:
-        const reverseRound = updateCurrentDirection(oldRound)
+        const reverseRound = changeDirection(oldRound)
         return {...reverseRound, currentPlayer: getNextPlayer(reverseRound)} //we dont need to cal next player 2 since we are passing updated round
       case card.Type.Draw:
         const drawRound = draw(2, oldRound.currentPlayer, oldRound)
@@ -304,39 +289,24 @@ function getPreviousPlayer(oldRound: Round): player.PlayerNames {
 //Helper Functions
 //Draw
 function deal(playerId:player.PlayerNames, oldRound: Round): [Card, player.PlayerNames, Round] {
-  let card, newDrawPile = deck.deal(oldRound.drawPile)
-  let newDiscardPile = undefined
+  const [card, newDrawPile] = deck.deal(oldRound.drawPile)
 
   if(deck.size(newDrawPile) === 0) {
     const [shaflledDrawPile, shaffledDiscardPile] = deck.createNewDecks(oldRound.discardPile)
-    newDiscardPile = shaffledDiscardPile
-    newDrawPile = shaflledDrawPile
+    return [card, playerId, {...oldRound, drawPile: shaflledDrawPile, discardPile: shaffledDiscardPile}]
   }
 
-  if(!newDiscardPile) {
-    newDiscardPile = oldRound.discardPile
-  }
-
-  return [card, playerId, {...oldRound, drawPile: newDrawPile, discardPile: newDiscardPile}]
+  return [card, playerId, {...oldRound, drawPile: newDrawPile}]
 }
 
 function playerAction(card: Card, playerId: player.PlayerNames, oldRound: Round): Round {
-  let playerForThisTurn = getSpecificPlayer(oldRound, playerId)
+  const playerForThisTurn = getSpecificPlayer(oldRound, playerId)
+  const playerUnoFalse = player.setUno(false, playerForThisTurn)
+  const updatedPlayer = player.addCard(card, playerUnoFalse)
 
-  const playerActionFlow = _.flow([setUnoFalse, addCardToPlayersHand])
-  playerForThisTurn = playerActionFlow(card,playerForThisTurn)
-
-  const newPlayersArray = oldRound.players.map(p => p.id === playerId ? playerForThisTurn : p)
+  const newPlayersArray = oldRound.players.map(p => p.id === playerId ? updatedPlayer : p)
 
   return {...oldRound, players: newPlayersArray}
-}
-
-function setUnoFalse(card: Card, oldPlayer: Player): [Card, Player] {
-  return [card, player.setUno(false, oldPlayer)]
-}
-
-function addCardToPlayersHand(card: Card, oldPlayer: Player): Player {
-  return player.addCard(card, oldPlayer)
 }
 
 export function playIfAllowed(opts: { cardId: number, color?: card.Colors }, round: Round) {
@@ -345,7 +315,7 @@ export function playIfAllowed(opts: { cardId: number, color?: card.Colors }, rou
     console.log("I tried to take a card that doesn't exist, whoops")
     return round
   }
-  let color = opts.color
+  const color = opts.color
   return canPlay(playedCard, round) ? play({ playedCard, color }, round) : round
 }
 
