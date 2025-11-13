@@ -1,5 +1,4 @@
 import { Player, PlayerNames } from './Player';
-import { Hand } from './Hand';
 
 // create a New Player
 export function createPlayer(
