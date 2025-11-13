@@ -43,9 +43,12 @@ export function removePlayer(playerId: PlayerId, g: Game): Game {
   const { [playerId]: _drop, ...rest } = g.scores;
   const currentRound = g.currentRound ? roundRemovePlayer(g.currentRound, playerId) : undefined;
 
-  let dealer = g.dealer;
-  if (players.length === 0) dealer = -1;
-  else if (dealer >= players.length) dealer = players.length - 1;
+  const dealer =
+    players.length === 0
+      ? -1
+      : g.dealer >= players.length
+        ? players.length - 1
+        : g.dealer;
 
   return { ...g, players, scores: rest as Record<PlayerId, number>, currentRound, dealer };
 }
@@ -54,26 +57,23 @@ export function removePlayer(playerId: PlayerId, g: Game): Game {
 
 
 export function selectDealerBy(g: Game): Game {
-  //if (g.players.length === 0) return { ...g, dealer: -1 };
-  let deck = DeckFactory.createNewDrawDeck();
-  let best = -Infinity;
-  let bestIdx = 0;
+ const { dealer } = g.players.reduce(
+    (state, _player, index) => {
+      const [card, nextDeck] = deal(state.deck);
+      const score = card ? Card.Points : -Infinity;
 
-
- 
-  for (let i = 0; i < g.players.length; i++) {
-    const [card, nextDeck] = deal(deck); 
-    deck = nextDeck;
-
-    // each card has points
-    const score = card ? Card.Points : -Infinity;
-    if (score > best) {
-      best = score;
-      bestIdx = i;
+      return score > state.bestScore
+        ? { deck: nextDeck, bestScore: score, dealer: index }
+        : { ...state, deck: nextDeck };
+    },
+    {
+      deck: DeckFactory.createNewDrawDeck(),
+      bestScore: -Infinity,
+      dealer: 0,
     }
-  }
+  );
 
-  return { ...g, dealer: bestIdx };
+  return { ...g, dealer };
 }
 
 
@@ -86,10 +86,9 @@ export function nextDealer(g: Game): Game {
 }
 
 const chooseDealer = (g: Game): Game =>
-  g.dealer === -1 ? selectDealerBy( g) : nextDealer(g);
+  g.dealer === -1 ? selectDealerBy(g) : nextDealer(g);
 
 
-const startRound = (players: PlayerRef[], dealer: PlayerId ): Round => RoundFactory.createRound(players, dealer);
 
 export function createRound(g: Game): Game {
   if (g.players.length === 0) return g;
@@ -98,7 +97,7 @@ export function createRound(g: Game): Game {
   const withDealer = chooseDealer(g);
 
   //  start a round based on players + dealer
-  const round = startRound(withDealer.players, withDealer.dealer);
+  const round = RoundFactory.createRound(withDealer.players, withDealer.dealer);
 
   return {
     ...withDealer,
@@ -119,13 +118,15 @@ export function roundFinished(g: Game): Game {
   const scores = { ...g.scores, [wId]: (g.scores[wId] ?? 0) + pts };
   const roundHistory = [...g.roundHistory, [wName, pts] as [string, number]];
 
-  let winner = g.winner;
-  for (const [idStr, sc] of Object.entries(scores) as Array<[string, number]>) {
-    if (sc >= g.targetScore) {
-      winner = Number(idStr) as PlayerId;
-      break;
-    }
-  }
+  const winner = (Object.entries(scores) as Array<[string, number]>).reduce<
+    PlayerId | undefined
+  >(
+    (currentWinner, [idStr, sc]) =>
+      currentWinner !== undefined || sc < g.targetScore
+        ? currentWinner
+        : (Number(idStr) as PlayerId),
+    g.winner
+  );
 
   return { ...g, scores, roundHistory, winner };
 }
