@@ -33,7 +33,7 @@ export function addPlayer(name: string, g: Game): Game {
   const nextId = g.players.length + 1;
   return {
     ...g,
-    players: [...g.players, { id: nextId, name }],
+    players: [...g.players, playerFactory.createPlayer(nextId,name)],
     scores: { ...g.scores, [nextId]: 0 },
   };
 }
