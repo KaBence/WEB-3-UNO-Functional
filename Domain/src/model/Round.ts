@@ -222,7 +222,7 @@ function getPreviousPlayer(oldRound: Round): player.PlayerNames {
             case card.Type.Skip:
             case card.Type.Reverse:
             case card.Type.Draw:
-              if(topCard.Type === hand[i].Type || topCard.Color === cardToCheck.Color)
+              if(topCard.Type === cardToCheck.Type || topCard.Color === cardToCheck.Color)
                 return true
               break;
             case card.Type.Numbered:
@@ -246,7 +246,7 @@ function getPreviousPlayer(oldRound: Round): player.PlayerNames {
                 return true;
               break;
             case card.Type.Numbered:
-              if(topCard.CardNumber === cardToCheck.CardNumber || topCard.Color === topCard.Color)
+              if(topCard.CardNumber === cardToCheck.CardNumber || topCard.Color === cardToCheck.Color)
                 return true;
               break;
             case card.Type.Wild:
@@ -385,3 +385,8 @@ export function handleSpecialCards(opts: { playedCard: Card, color?: card.Colors
       return round;
   }
 }
+
+  export function removePlayer(playerId: number, oldRound:Round): Round {
+    const updatedPlayers = oldRound.players.filter(p => p.id !== playerId);
+    return {...oldRound, players: updatedPlayers}
+  }
