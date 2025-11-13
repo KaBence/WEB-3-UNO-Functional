@@ -89,11 +89,21 @@ const chooseDealer = (g: Game): Game =>
   g.dealer === -1 ? selectDealerBy( g) : nextDealer(g);
 
 
-const startRound = (g: Game): Game => RoundFactory.createRound(g);
+const startRound = (players: PlayerRef[], dealer: PlayerId ): Round => RoundFactory.createRound(players, dealer);
 
 export function createRound(g: Game): Game {
   if (g.players.length === 0) return g;
-  return flow(chooseDealer, startRound)(g);
+
+  //  decide dealer on the Game
+  const withDealer = chooseDealer(g);
+
+  //  start a round based on players + dealer
+  const round = startRound(withDealer.players, withDealer.dealer);
+
+  return {
+    ...withDealer,
+    currentRound: round,
+  };
 }
 
 
