@@ -3,7 +3,7 @@ import * as _ from "lodash";
 import * as card from "./Card"
 import * as cardFactory from "./CardFactory"
 import * as deckFactory from "./DeckFactory"
-import * as deck from "./Deck";
+import * as deck from "./deck";
 import * as player from "./Player";
 
 export enum Direction {
@@ -64,16 +64,11 @@ export function getSpecificPlayer(player: player.PlayerNames, oldRound: Round): 
   return oldRound.players.find((p) => p.id === player)!
 }
 
-function getPlayerHand(player: player.PlayerNames, oldRound: Round): Hand | undefined {
-  return getSpecificPlayer(oldRound,player)?.hand
-}
 
 
-function getPlayersCard(player: player.PlayerNames, card: number, oldRound: Round): Card | undefined {
-  return getPlayerHand(oldRound,player)?.cards[card]
-}
 
-function getRoundWinner(oldRound: Round): Round {
+
+export function getRoundWinner(oldRound: Round): Round {
   if(oldRound.players.some((p) => p.hand.length === 0)){
     const winner = oldRound.players.find((p) => p.hand.length === 0)!
     const statusMessage = winner.name + " Won the round!"
@@ -161,7 +156,7 @@ export function canPlay(playedCard: Card, oldRound: Round): boolean {
 
 export function sayUno(playerId: player.PlayerNames, oldRound: Round): Round {
     const specificPlayer = getSpecificPlayer(playerId, oldRound)
-    const playersHand = getPlayerHand(playerId, oldRound)
+    const playersHand = specificPlayer.hand
     if (playersHand.length === 2) {
       const card = [playersHand[0], playersHand[1]]
       if (canPlay(card[0], oldRound) || canPlay(card[1], oldRound)) {
@@ -211,10 +206,12 @@ function getPreviousPlayer(oldRound: Round): player.PlayerNames {
 }
 
   function couldPlayInsteadofDrawFour(oldRound: Round): boolean {
-    const hand = getPlayerHand(getPreviousPlayer(oldRound), oldRound).cards;
+    const hand = getSpecificPlayer(getPreviousPlayer(oldRound),oldRound).hand
+
     const topCard = oldRound.topCard;
     for (let i = 0; i < hand.length; i++) {
-      switch (hand[i].Type) {
+      const cardToCheck = hand[i];
+      switch (cardToCheck.Type) {
         case card.Type.Reverse:
         case card.Type.Draw:
         case card.Type.Skip:
@@ -225,13 +222,13 @@ function getPreviousPlayer(oldRound: Round): player.PlayerNames {
             case card.Type.Skip:
             case card.Type.Reverse:
             case card.Type.Draw:
-              if(topCard.Type === hand[i].Type || topCard.Color === hand[i].Color)
+              if(topCard.Type === hand[i].Type || topCard.Color === cardToCheck.Color)
                 return true
               break;
             case card.Type.Numbered:
             case card.Type.Dummy:
             case card.Type.DummyDraw4:
-              if(topCard.Color === hand[i].Color)
+              if(topCard.Color === cardToCheck.Color)
                 return true;
               break;
           }
@@ -245,11 +242,11 @@ function getPreviousPlayer(oldRound: Round): player.PlayerNames {
             case card.Type.Draw:
             case card.Type.Dummy:
             case card.Type.DummyDraw4:
-              if(topCard.Color === hand[i].Color)
+              if(topCard.Color === cardToCheck.Color)
                 return true;
               break;
             case card.Type.Numbered:
-              if(topCard.CardNumber === hand[i].CardNumber || topCard.Color === topCard.Color)
+              if(topCard.CardNumber === cardToCheck.CardNumber || topCard.Color === topCard.Color)
                 return true;
               break;
             case card.Type.Wild:
@@ -340,7 +337,7 @@ export function playerAction(card: Card, playerId: player.PlayerNames, oldRound:
 }
 
 export function playIfAllowed(opts: { cardId: number, color?: card.Colors }, round: Round) {
-  const playedCard = getPlayersCard(round.currentPlayer, opts.cardId, round)! // has to remove the card
+  const playedCard = getSpecificPlayer(round.currentPlayer, round ).hand[opts.cardId] // has to remove the card
   if (playedCard == undefined) { // has to change
     console.log("I tried to take a card that doesn't exist, whoops")
     return round
@@ -365,9 +362,9 @@ export function changeDirection(round: Round): Round {
   return { ...roundAfterSkip, currentDirection }
 }
 
-export function addCardToDiscardPile(card: Card, round: Round): Round {
-  const discardPile = deck.addCard(card, round.discardPile)
-  return { ...round, discardPile, statusMessage: "Played: " + card.cardToString(card) }
+export function addCardToDiscardPile(cardToAdd: Card, round: Round): Round {
+  const discardPile = deck.addCard(cardToAdd, round.discardPile)
+  return { ...round, discardPile, statusMessage: "Played: " + card.cardToString(cardToAdd) }
 }
 
 export function handleSpecialCards(opts: { playedCard: Card, color?: card.Colors }, round: Round): Round {
