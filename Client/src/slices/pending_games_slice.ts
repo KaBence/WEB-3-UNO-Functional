@@ -20,7 +20,7 @@ const pending_games_reducers = {
     return _.set(index, action.payload, state)
   },
 
-  remove(state: PendingGamesState, action: PayloadAction<Game>): PendingGamesState {
+  remove(state: PendingGamesState, action: PayloadAction<{id:number}>): PendingGamesState {
     return _.remove(_.matches({id: action.payload.id}), state)
   }
 }
