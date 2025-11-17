@@ -13,7 +13,7 @@ function App() {
   useEffect(() => {
     dispatch(InitThunk)
     dispatch(GetActiveGamesThunk)
-    dispatch(LiveUpdateOngoing)
+    dispatch(GetPendingGamesThunk)
   }, [])
 
   return (
