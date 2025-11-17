@@ -1,23 +1,20 @@
+@import './index.css';
+
 #app {
-  background-color: rgb(243, 244, 245);
-  margin: 10px;
-  padding: 0.6rem;
-  overflow: auto;
+  padding: 2rem;
+  font-weight: normal;
 }
-html {
-  height: 100%;
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
 }
-body {
-  width: 1024px;
-  height: 100%;
-  margin: 0 auto;
-  background-color:rgb(20, 30, 47);
-}
-nav {
-  margin-left: 5%;
-  float: right;
-}
-.link {
-  margin: .3rem;
-  display: block;
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
 }
