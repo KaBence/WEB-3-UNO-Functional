@@ -16,7 +16,7 @@ export type PlayerRefSpecs = Readonly<{
 
 export type GameSpecs = Readonly<{
     id: number
-    players: PlayerSpecs[]
+    players: PlayerRefSpecs[]
     currentRound?: RoundSpecs
     scores: Record<PlayerNames, Number>
     dealer: number
