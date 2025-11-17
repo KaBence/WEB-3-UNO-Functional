@@ -4,22 +4,20 @@ import router from './router'
 import { RouterProvider } from 'react-router-dom'
 import { type Dispatch } from './stores/store'
 import { useEffect } from 'react'
-import InitGameThunk from './thunks/InitGameThunk'
-import LiveUpdatePending from './thunks/LiveUpdatePending'
-import LiveUpdateOngoing from './thunks/LiveUpdateOngoing'
+import InitThunk from './thunks/InitThunk'
+import GetActiveGamesThunk from './thunks/GetActiveGamesThunk'
+import GetPendingGamesThunk from './thunks/GetPendingGamesThunk'
 
 function App() {
   const dispatch: Dispatch = useDispatch()
   useEffect(() => {
-    dispatch(InitGameThunk)
-    dispatch(LiveUpdatePending)
+    dispatch(InitThunk)
+    dispatch(GetActiveGamesThunk)
     dispatch(LiveUpdateOngoing)
   }, [])
 
   return (
     <div id='app'>
-      <h1 className="header">Yahtzee!</h1>
-  
       <RouterProvider router={router}/>
     </div>
   )
