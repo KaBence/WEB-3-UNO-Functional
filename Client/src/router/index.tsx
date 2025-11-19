@@ -6,7 +6,7 @@ import Game from '../views/Game'
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Login/>
+    element: <Game/>
   }, 
   {
     path: '/lobby',

@@ -1,0 +1,143 @@
+.gamestatus {
+  display: block;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #1e1e2f;
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 40vh;
+  min-height: 95vh;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.empty {
+  height: 12vh;
+}
+
+.gamestatus h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.player-list {
+  margin-bottom: 20px;
+}
+
+.player {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: #2e2e3f;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.player.current {
+  background-color: #2196f3;
+  color: white;
+  font-weight: bold;
+  border: 2px solid #64b5f6;
+  transform: scale(1.02);
+  transition: all 0.2s ease-in-out;
+}
+
+.rank {
+  font-weight: bold;
+}
+
+.name {
+  flex: 1;
+  text-align: left;
+  margin-left: 10px;
+}
+
+.score {
+  font-weight: bold;
+}
+
+.play-again {
+  background: linear-gradient(135deg, #00b4d8, #0077b6);
+  color: white;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+}
+
+.play-again:hover {
+  background: linear-gradient(135deg, #0096c7, #023e8a);
+  transform: translateY(-2px);
+}
+
+.timer {
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+  background-color: #007bff;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.timer.critical {
+  background-color: red;
+  animation: pulsate 1s infinite;
+}
+
+@keyframes pulsate {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.winner-banner {
+  margin-top: 10px;
+  padding: 10px;
+  border: 2px solid gold;
+  border-radius: 8px;
+  background-color: #333;
+  color: gold;
+  font-weight: bold;
+}
+
+.winner-section {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.play-again-final {
+  background: linear-gradient(135deg, #00b09b, #96c93d);
+  color: white;
+  font-weight: 600;
+  padding: 12px 28px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+  transition: 0.2s ease;
+  margin-top: 25px;
+}
+
+.play-again-final:hover {
+  background: linear-gradient(135deg, #00a86b, #7bb02d);
+  transform: translateY(-2px);
+}

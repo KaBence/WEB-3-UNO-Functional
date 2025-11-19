@@ -6,14 +6,14 @@ import { type Dispatch } from './stores/store'
 import { useEffect } from 'react'
 import InitThunk from './thunks/InitThunk'
 import GetActiveGamesThunk from './thunks/GetActiveGamesThunk'
-import GetPendingGamesThunk from './thunks/GetPendingGamesThunk'
+//import GetPendingGamesThunk from './thunks/GetPendingGamesThunk'
 
 function App() {
   const dispatch: Dispatch = useDispatch()
   useEffect(() => {
     dispatch(InitThunk)
     dispatch(GetActiveGamesThunk)
-    dispatch(GetPendingGamesThunk)
+  //  dispatch(GetPendingGamesThunk)
   }, [])
 
   return (

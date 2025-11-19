@@ -1,0 +1,115 @@
+.uno-card {
+  width: 100px;
+  height: 160px;
+  border-radius: 15px;
+  border: 4px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.uno-card:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.card-red {
+  background: #d62828;
+  color: #fff;
+}
+
+.card-yellow {
+  background: #f1c40f;
+  color: #000;
+}
+
+.card-green {
+  background: #2ecc71;
+  color: #fff;
+}
+
+.card-blue {
+  background: #1e88e5;
+  color: #fff;
+}
+
+.card-black {
+  background: #1c1c1c;
+  color: #fff;
+}
+
+.center-oval {
+  background: #fff;
+  width: 72%;
+  height: 62%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-20deg);
+  position: relative;
+}
+
+.center-text {
+  font-size: 26px;
+  font-weight: 1000;
+  color: #000;
+  -webkit-text-stroke: 1.5px #fff;
+  text-transform: uppercase;
+  text-align: center;
+  transform: rotate(20deg);
+}
+
+.corner {
+  position: absolute;
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  -webkit-text-stroke: 1px #000;
+}
+
+.top-left {
+  top: 4px;
+  left: 6px;
+}
+
+.bottom-right {
+  bottom: 4px;
+  right: 6px;
+  transform: rotate(180deg);
+}
+
+.wild-symbol {
+  width: 60%;
+  height: 60%;
+  display: grid;
+  grid-template: 1fr 1fr / 1fr 1fr;
+  gap: 2px;
+  border-radius: 8px;
+  transform: rotate(20deg);
+}
+
+.wild-square {
+  width: 100%;
+  height: 100%;
+}
+
+.wild-square.red {
+  background: #d62828;
+}
+
+.wild-square.yellow {
+  background: #f1c40f;
+}
+
+.wild-square.green {
+  background: #2ecc71;
+}
+
+.wild-square.blue {
+  background: #1e88e5;
+}
