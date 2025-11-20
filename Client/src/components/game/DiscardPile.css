@@ -1,0 +1,23 @@
+.discard-pile {
+  position: relative;
+  width: 120px;
+  height: 180px;
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  background: #f9f9f9;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-wrapper {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.empty-text {
+  font-size: 14px;
+  color: #888;
+}
