@@ -26,12 +26,12 @@ const mock: ChallengeContext = {challengedPlayer: PlayerNames.player1, handBefor
 
 const initialState: PopupState = {
   showChallenge: false, 
-  showChallengeResult: true,
+  showChallengeResult: false,
   showColorChange: false,
   showPlay: false,
-  challengeResult: true,
+  challengeResult: false,
   colorSelected: "",
-  challengeContext: mock,
+  challengeContext: undefined, //for test change to cosnt mock
 };
 
 export const popup_slice = createSlice({
