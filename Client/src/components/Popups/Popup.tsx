@@ -1,6 +1,6 @@
 import "./Popups.css";
 
-import React, { type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 interface Action {
   label: string;
@@ -15,7 +15,7 @@ interface PopupProps {
   footer?: ReactNode;
 }
 
-const Popup: React.FC<PopupProps> = ({ visible, title, actions, children, footer }) => {
+const Popup = ({ visible, title, actions, children, footer }: PopupProps) => {
   if (!visible) return null;
 
   return (

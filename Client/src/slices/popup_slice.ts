@@ -19,76 +19,67 @@ export interface PopupState {
   challengeContext?: ChallengeContext;
 }
 
-//Test purposes
+// Test mocks
 import { Type, Colors } from "domain/src/model/Card";
-const mockCard: CardSpecs = {type: Type.Numbered, number: 7, color: Colors.Blue}
-const mock: ChallengeContext = {challengedPlayer: PlayerNames.player1, handBeforeDraw: [mockCard]}
+const mockCard: CardSpecs = { type: Type.Numbered, number: 7, color: Colors.Blue };
+const mock: ChallengeContext = { challengedPlayer: PlayerNames.player1, handBeforeDraw: [mockCard] };
 
 const initialState: PopupState = {
-  showChallenge: false, 
+  showChallenge: false,
   showChallengeResult: false,
   showColorChange: false,
   showPlay: false,
   challengeResult: false,
   colorSelected: "",
-  challengeContext: undefined, //for test change to cosnt mock
+  challengeContext: undefined,
+};
+
+const popupReducers = {
+  openChallenge(_state: PopupState) {
+    return { ..._state, showChallenge: true };
+  },
+  closeChallenge(_state: PopupState) {
+    return { ..._state, showChallenge: false };
+  },
+  openChallengeResultSnapshot(
+    _state: PopupState,
+    action: PayloadAction<{ result: boolean; challengedPlayerId: PlayerNames; handBeforeDraw: CardSpecs[] }>
+  ) {
+    return {
+      ..._state,
+      showChallengeResult: true,
+      challengeResult: action.payload.result,
+      challengeContext: {
+        challengedPlayer: action.payload.challengedPlayerId,
+        handBeforeDraw: action.payload.handBeforeDraw,
+      },
+    };
+  },
+  setChallengeResult(_state: PopupState, action: PayloadAction<boolean>) {
+    return { ..._state, challengeResult: action.payload };
+  },
+  closeChallengeResult(_state: PopupState) {
+    return { ..._state, showChallengeResult: false, challengeContext: undefined };
+  },
+  openColorChange(_state: PopupState) {
+    return { ..._state, showColorChange: true };
+  },
+  closeColorChange(_state: PopupState) {
+    return { ..._state, showColorChange: false };
+  },
+  setColorSelected(_state: PopupState, action: PayloadAction<string>) {
+    return { ..._state, colorSelected: action.payload };
+  },
+  openPlay(_state: PopupState) {
+    return { ..._state, showPlay: true };
+  },
+  closePlay(_state: PopupState) {
+    return { ..._state, showPlay: false };
+  },
 };
 
 export const popup_slice = createSlice({
   name: "popup",
-  initialState,
-  reducers: {
-    openChallenge(state) {
-      state.showChallenge = true;
-    },
-    closeChallenge(state) {
-      state.showChallenge = false;
-    },
-    openChallengeResultSnapshot(
-      state,
-      action: PayloadAction<{ result: boolean; challengedPlayerId: PlayerNames; handBeforeDraw: CardSpecs[] }>
-    ) {
-      state.showChallengeResult = true;
-      state.challengeResult = action.payload.result;
-      state.challengeContext = {
-        challengedPlayer: action.payload.challengedPlayerId,
-        handBeforeDraw: action.payload.handBeforeDraw,
-      };
-    },
-    setChallengeResult(state, action: PayloadAction<boolean>) {
-      state.challengeResult = action.payload;
-    },
-    closeChallengeResult(state) {
-      state.showChallengeResult = false;
-      state.challengeContext = undefined;
-    },
-    openColorChange(state) {
-      state.showColorChange = true;
-    },
-    closeColorChange(state) {
-      state.showColorChange = false;
-    },
-    setColorSelected(state, action: PayloadAction<string>) {
-      state.colorSelected = action.payload;
-    },
-    openPlay(state) {
-      state.showPlay = true;
-    },
-    closePlay(state) {
-      state.showPlay = false;
-    },
-  },
+  initialState: initialState,
+  reducers: popupReducers
 });
-
-export const {
-  openChallenge,
-  closeChallenge,
-  openChallengeResultSnapshot,
-  setChallengeResult,
-  closeChallengeResult,
-  openColorChange,
-  closeColorChange,
-  setColorSelected,
-  openPlay,
-  closePlay,
-} = popup_slice.actions;

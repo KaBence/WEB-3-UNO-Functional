@@ -1,4 +1,3 @@
-import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Popup from "./Popup";
 import type { State, Dispatch } from "../../stores/store";
@@ -8,7 +7,7 @@ interface ChallengePopupProps {
   gameId: number;
 }
 
-const ChallengePopup: React.FC<ChallengePopupProps> = ({ gameId }) => {
+const ChallengePopup = ({ gameId }: ChallengePopupProps) => {
   const dispatch = useDispatch<Dispatch>();
   const { showChallenge } = useSelector((state: State) => state.popups);
 

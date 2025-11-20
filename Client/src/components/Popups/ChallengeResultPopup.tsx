@@ -1,11 +1,11 @@
-import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import Popup from "./Popup";
 import type { State, Dispatch } from "../../stores/store";
-import { closeChallengeResult } from "../../slices/popup_slice";
+import { popup_slice } from "../../slices/popup_slice";
+
 //import PlayerHand from "../components/PlayerHand"; // michaeala
 
-const ChallengeResultPopup: React.FC = () => {
+const ChallengeResultPopup = () => {
   const dispatch = useDispatch<Dispatch>();
   const { showChallengeResult, challengeResult, challengeContext } = useSelector(
     (state: State) => state.popups
@@ -23,7 +23,7 @@ const ChallengeResultPopup: React.FC = () => {
       actions={[
         {
           label: "Ok",
-          onClick: () => dispatch(closeChallengeResult()),
+          onClick: () => dispatch(popup_slice.actions.closeChallenge()),
         },
       ]}
     >

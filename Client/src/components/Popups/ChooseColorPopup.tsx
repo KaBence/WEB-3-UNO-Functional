@@ -1,4 +1,3 @@
-import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import Popup from "./Popup";
 import type { State, Dispatch } from "../../stores/store";
@@ -10,7 +9,7 @@ interface ChooseColorPopupProps {
   cardIndex: number;
 }
 
-const ChooseColorPopup: React.FC<ChooseColorPopupProps> = ({ gameId, cardIndex }) => {
+const ChooseColorPopup = ({ gameId, cardIndex }:ChooseColorPopupProps) => {
   const dispatch = useDispatch<Dispatch>();
   const { showColorChange } = useSelector((state: State) => state.popups);
 

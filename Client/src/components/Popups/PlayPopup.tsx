@@ -1,4 +1,3 @@
-import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import Popup from "./Popup";
 import type { State, Dispatch } from "../../stores/store";
@@ -12,7 +11,7 @@ interface PlayPopupProps {
   card: CardSpecs;
 }
 
-const PlayPopup: React.FC<PlayPopupProps> = ({ gameId, cardIndex }) => {
+const PlayPopup = ({ gameId, cardIndex }: PlayPopupProps) => {
   const dispatch = useDispatch<Dispatch>();
   const { showPlay, colorSelected } = useSelector((state: State) => state.popups);
 
