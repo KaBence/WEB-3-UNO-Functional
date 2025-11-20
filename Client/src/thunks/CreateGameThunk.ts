@@ -1,5 +1,5 @@
 import * as api from '../model/api'
-import { pending_games_slice } from '../slices/pending_games_slice'
+import { pending_games_slice } from '../stores/pendingGamesSlice'
 import type { Dispatch } from '../stores/store'
 
 export const createGameThunk = () => async (dispatch: Dispatch) => {
@@ -10,4 +10,3 @@ export const createGameThunk = () => async (dispatch: Dispatch) => {
     console.error("Failed to create game:", error)
   }
 }
-//Should the pending games be updated after creating a game into the active game here?

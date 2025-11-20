@@ -1,0 +1,98 @@
+/* Page layout */
+.login-root {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background-color: #f3f4f6; /* gray-100 */
+  padding: 1.5rem; /* p-6 */
+  box-sizing: border-box;
+}
+
+/* Card */
+.login-card {
+  width: 100%;
+  max-width: 28rem; /* ~max-w-md */
+  background: #ffffff;
+  border-radius: 1rem; /* rounded-2xl */
+  box-shadow: 0 10px 30px rgba(16,24,40,0.08); /* subtle shadow */
+  padding: 2.25rem; /* p-9 */
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* Logo */
+.login-logo {
+  width: 6rem; /* w-24 */
+  margin: 0 auto 1rem;
+  display: block;
+}
+
+/* Title */
+.login-title {
+  font-size: 1.25rem; /* text-2xl */
+  font-weight: 800;
+  color: #1f2937; /* gray-800 */
+  margin: 0 0 0.75rem;
+}
+
+/* Form area */
+.login-form {
+  margin-top: 0.5rem;
+}
+
+/* Input */
+.login-input {
+  width: 100%;
+  height: 2.75rem; /* h-11 */
+  border-radius: 0.5rem; /* rounded-lg */
+  background: #f8fafc; /* slate-50 */
+  padding: 0 1rem; /* px-4 */
+  font-size: 1rem; /* text-base */
+  outline: none;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+  border: 1px solid #e5e7eb; /* gray-200 */
+  caret-color: #16a34a; /* green-ish caret */
+  box-sizing: border-box;
+}
+
+.login-input::placeholder {
+  color: #9ca3af; /* placeholder-gray-400 */
+}
+
+/* Error text */
+.login-error {
+  color: #dc2626; /* red-500 */
+  font-size: 0.875rem; /* text-sm */
+  margin-top: 0.5rem;
+  text-align: left;
+}
+
+/* Button */
+.login-button {
+  margin-top: 1rem; /* mt-4 */
+  width: 100%;
+  height: 3rem; /* h-12 */
+  border-radius: 0.5rem;
+  font-weight: 600;
+  background: #16a34a; /* green-600 */
+  color: #ffffff;
+  box-shadow: 0 6px 12px rgba(16,24,40,0.08);
+  border: none;
+  cursor: pointer;
+  transition: filter 120ms ease, transform 80ms ease;
+}
+
+.login-button:hover {
+  filter: brightness(1.05);
+}
+
+.login-button:active {
+  transform: translateY(0.25rem);
+}
+
+/* Small responsive tweak */
+@media (max-width: 400px) {
+  .login-card {
+    padding: 1.25rem;
+  }
+}
