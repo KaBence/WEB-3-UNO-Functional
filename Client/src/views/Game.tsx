@@ -3,6 +3,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import StatusBar from "../components/Statusbar"
 import PlayersBar from "../components/OtherPlayerBar"
+import PlayPopup from "../components/Popups/PlayPopup";
+import ChooseColorPopup from "../components/Popups/ChooseColorPopup";
+import ChallengePopup from "../components/Popups/ChallengePopup";
+import ChallengeResultPopup from "../components/Popups/ChallengeResultPopup";
 import DrawPile from '../components/game/DrawPile'
 import DiscardPile from '../components/game/DiscardPile'
 import PlayerHand from '../components/game/PlayerHand'
@@ -20,6 +24,7 @@ import PlayCardThunk from '../thunks/PlayCardThunk'
 import CanPlayThunk from '../thunks/CanPlayThunk'
 import UnoCallThunk from '../thunks/UnoCallThunk'
 import './Game.css'
+//Test purposes
 
 const mockPlayers = [
   {
@@ -46,7 +51,7 @@ const mockPlayers = [
 
 const mockDispatch: Dispatch = ((action: AnyAction | any) => {
   console.log("dispatch called:", action);
-  return action;   // ważne! dispatch musi coś zwracać, np. samą akcję
+  return action;
 }) as Dispatch;
 
 const fallbackHand: CardSpecs[] = []
@@ -192,8 +197,12 @@ const Game = () => {
         game={game}
         myPlayerId={myPlayer?.playerName ?? PlayerNames.player1}
       />
-       <StatusBar message="Test" isYourTurn={true} arrowAngle={180} score={120}/>
-        <PlayersBar players={mockPlayers} gameId={1} currentPlayerId={1} dispatch={mockDispatch}/>
+      <StatusBar message="Test" isYourTurn={true} arrowAngle={180} score={120}/>
+      <PlayersBar players={mockPlayers} gameId={1} currentPlayerId={1} dispatch={mockDispatch}/>
+      <PlayPopup gameId={1} cardIndex={0} card={{ type: Type.Numbered, color: Colors.Red, number: 7 }} />
+      <ChooseColorPopup gameId={1} cardIndex={1}/>
+      <ChallengePopup gameId={1} /> 
+      <ChallengeResultPopup />
     </div>
   )
 }
