@@ -2,18 +2,21 @@ import { configureStore } from "@reduxjs/toolkit"
 import { player_slice, type PlayerState } from "../slices/player_slice"
 import { pending_games_slice, type PendingGamesState } from "../slices/pending_games_slice"
 import { active_games_slice, type ActiveGamesState } from "../slices/active_games_slice"
+import { popup_slice, type PopupState } from "../slices/popup_slice";
 
 export type State = { 
   player: PlayerState, 
   pending_games: PendingGamesState, 
   active_games: ActiveGamesState 
+  popups: PopupState
 }
 
 export const store = configureStore<State>({
     reducer: { 
       player: player_slice.reducer, 
       pending_games: pending_games_slice.reducer, 
-      active_games: active_games_slice.reducer 
+      active_games: active_games_slice.reducer, 
+      popups: popup_slice.reducer
     }
 })
 

@@ -1,21 +1,69 @@
+import './Game.css'
+
+//React stuff
 import { useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
+
+//Components
+import StatusBar from "../components/Statusbar"
+import PlayersBar from "../components/OtherPlayerBar"
+import PlayPopup from "../components/Popups/PlayPopup";
+import ChooseColorPopup from "../components/Popups/ChooseColorPopup";
+import ChallengePopup from "../components/Popups/ChallengePopup";
+import ChallengeResultPopup from "../components/Popups/ChallengeResultPopup";
 import DrawPile from '../components/game/DrawPile'
 import DiscardPile from '../components/game/DiscardPile'
 import PlayerHand from '../components/game/PlayerHand'
 import UnoButton from '../components/game/UnoButton'
 import GameStatus from '../components/game/GameStatus'
+
+//Specs
 import type { CardSpecs, PlayerSpecs, RoundSpecs } from '../model/game'
 import type { State, Dispatch as AppDispatch } from '../stores/store'
+
+//Domain Enums
 import { PlayerNames } from 'Domain/src/model/Player'
 import { Direction } from 'Domain/src/model/round'
 import { Colors, Type } from 'Domain/src/model/Card'
+
+//Store and thunks should we have thunks here?
+import type { Dispatch } from "../stores/store";
 import DrawCardThunk from '../thunks/DrawCardThunk'
 import PlayCardThunk from '../thunks/PlayCardThunk'
 import CanPlayThunk from '../thunks/CanPlayThunk'
 import UnoCallThunk from '../thunks/UnoCallThunk'
-import './Game.css'
+
+//Test purposes
+import type { AnyAction } from "@reduxjs/toolkit";
+
+const mockPlayers = [
+  {
+    name: "Alice",
+    unoCalled: false,
+    playerName: PlayerNames.player1,
+    hand: [
+      { type: Type.Numbered, color: Colors.Red, number: 5 as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 },
+      { type: Type.Numbered, color: Colors.Blue, number: 7 as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 },
+      { type: Type.Numbered, color: Colors.Green, number: 2 as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 },
+    ],
+  },
+  {
+    name: "Bob",
+    unoCalled: false,
+    playerName: PlayerNames.player2,
+    hand: [
+      { type: Type.Numbered, color: Colors.Yellow, number: 1 as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 },
+      { type: Type.Numbered, color: Colors.Red, number: 3 as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 },
+    ],
+  },
+];
+
+
+const mockDispatch: Dispatch = ((action: AnyAction | any) => {
+  console.log("dispatch called:", action);
+  return action;
+}) as Dispatch;
 
 const fallbackHand: CardSpecs[] = []
 
@@ -118,10 +166,11 @@ const Game = () => {
     <div className='game-view'>
       <div className='game-board-area'>
         <div className='status-bar'>
-          <span className='status-label'>Status:</span>
-          <span>{statusMessage}</span>
+          <StatusBar message="Test" isYourTurn={true} arrowAngle={180} score={120}/>
         </div>
-
+        <div className='player-bar'>
+          <PlayersBar players={mockPlayers} gameId={1} currentPlayerId={1} dispatch={mockDispatch}/>
+        </div>
         <section className='tabletop'>
           <div className='pile-section'>
             <DrawPile
@@ -155,11 +204,17 @@ const Game = () => {
           </div>
         </section>
       </div>
+      <div>
 
+      </div>
       <GameStatus
         game={game}
         myPlayerId={myPlayer?.playerName ?? PlayerNames.player1}
       />
+      <PlayPopup gameId={1} cardIndex={0} newCard={{ type: Type.Numbered, color: Colors.Red, number: 7 }} />
+      <ChooseColorPopup gameId={1} cardIndex={1}/>
+      <ChallengePopup gameId={1} /> 
+      <ChallengeResultPopup />
     </div>
   )
 }

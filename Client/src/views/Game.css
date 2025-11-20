@@ -1,6 +1,9 @@
 .game-view {
   display: flex;
   align-items: flex-start;
+  justify-content: space-between;
+  height: 100vh;
+  overflow: hidden;
   gap: 3rem;
   padding: 2.5rem 2rem;
 }
@@ -15,12 +18,21 @@
 
 .status-bar {
   width: 100%;
+  color: #f2f2f2;
+  padding: 0.85rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.player-bar {
+  width: 100%;
   background: #21293a;
   color: #f2f2f2;
   padding: 0.85rem 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   display: flex;
+  align-items: flex-start;
   gap: 0.5rem;
   font-weight: 600;
 }
