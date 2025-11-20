@@ -1,8 +1,8 @@
-import { useRef, useState, type KeyboardEvent } from 'react'
+import { useState, type KeyboardEvent } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import type { Dispatch } from '../stores/store'
-import { login } from '../slices/player_slice'
+import {player_slice} from '../slices/player_slice'
 import './login.css'
 
 const Login = () => {
@@ -20,7 +20,7 @@ const Login = () => {
       setError('Please enter a name')
       return
     }
-    dispatch(login(trimmed))
+    dispatch(player_slice.actions.login(trimmed))
     navigate(`/lobby?player=${trimmed}`)
   }
 

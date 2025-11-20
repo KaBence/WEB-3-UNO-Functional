@@ -22,7 +22,8 @@ export interface PopupState {
 // Test mocks
 import { Type, Colors } from "domain/src/model/Card";
 const mockCard: CardSpecs = { type: Type.Numbered, number: 7, color: Colors.Blue };
-const mock: ChallengeContext = { challengedPlayer: PlayerNames.player1, handBeforeDraw: [mockCard] };
+const mockCard2: CardSpecs = { type: Type.Numbered, number: 7, color: Colors.Red };
+const mock: ChallengeContext = { challengedPlayer: PlayerNames.player1, handBeforeDraw: [mockCard, mockCard2] };
 
 const initialState: PopupState = {
   showChallenge: false,

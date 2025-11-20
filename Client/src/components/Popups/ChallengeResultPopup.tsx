@@ -2,8 +2,17 @@ import { useSelector, useDispatch } from "react-redux";
 import Popup from "./Popup";
 import type { State, Dispatch } from "../../stores/store";
 import { popup_slice } from "../../slices/popup_slice";
+import UnoCard from '../game/UnoCard'
 
-//import PlayerHand from "../components/PlayerHand"; // michaeala
+
+const cardStyle = (index: number, total: number) => {
+  const angle = (index - (total - 1) / 2) * 8
+  const shift = Math.abs(index - (total - 1) / 2) * 6
+  return {
+    transform: `rotate(${angle}deg) translateY(${shift}px)`,
+    zIndex: index
+  } as const
+}
 
 const ChallengeResultPopup = () => {
   const dispatch = useDispatch<Dispatch>();
@@ -27,6 +36,16 @@ const ChallengeResultPopup = () => {
         },
       ]}
     >
+    <div className='player-hand'>
+      {challengeContext.handBeforeDraw.map((card, index) => (
+        <UnoCard
+          key={`${card.type}-${card.color ?? ''}-${card.number ?? ''}-${index}`}
+          card={card}
+          className='hand-card'
+          style={cardStyle(index, challengeContext.handBeforeDraw.length)}
+        />
+      ))}
+    </div>
     </Popup>
   );
 };
