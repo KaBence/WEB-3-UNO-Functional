@@ -1,25 +1,26 @@
-import { useState, type KeyboardEvent } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useRef, useState, type KeyboardEvent } from 'react'
+import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import type { Dispatch, State } from '../stores/store'
-import { setPlayer } from '../stores/playerSlice'
+import type { Dispatch } from '../stores/store'
+import { login } from '../slices/player_slice'
 import './login.css'
 
 const Login = () => {
   const dispatch = useDispatch<Dispatch>()
   const navigate = useNavigate()
-  const existingPlayer = useSelector((s: State) => s.player.player) //check for existing player in state
 
-  const [playerName, setPlayerName] = useState<string>(existingPlayer ?? '')
+ 
   const [error, setError] = useState<string | null>(null)
 
   const submit = () => {
-    const trimmed = playerName.trim()
+    const inputElement = document.getElementById('player-name-input') as HTMLInputElement ;
+    const currentName = inputElement?.value || ''
+    const trimmed = currentName.trim()
     if (!trimmed) {
       setError('Please enter a name')
       return
     }
-    dispatch(setPlayer(trimmed))
+    dispatch(login(trimmed))
     navigate(`/lobby?player=${trimmed}`)
   }
 
@@ -42,11 +43,7 @@ const Login = () => {
           <input
             aria-label="Player name"
             placeholder="Enter name"
-            value={playerName}
-            onChange={(e) => {
-              setPlayerName(e.target.value)
-              if (error) setError(null)
-            }}
+            id="player-name-input" // <-- ADD THIS ID
             onKeyDown={onKey}
             className="login-input"
           />
