@@ -1,0 +1,80 @@
+
+# Defines the type of change that occurred.
+enum GameListAction {
+  ADDED
+  UPDATED
+  REMOVED
+}
+
+# The payload for our subscription events.
+# It is clean, type-safe, and efficient.
+type GameListUpdate {
+  action: GameListAction!
+  gameId: Int!
+  game: Game # Null for REMOVED, present for ADDED/UPDATED
+}
+
+type Player {
+    name: String!
+    unoCalled: Boolean!
+    hand: [Card]!
+    playerName:Int!
+}
+
+type PlayerRef {
+    name: String!
+    playerName: Int!
+}
+
+type Round {
+    players: [Player]!
+    currentDirection: String!
+    currentPlayer: Int!
+    drawDeckSize: Int!
+    topCard: Card!
+    statusMessage: String
+    winner: Int
+}
+
+type Card {
+    type: String!
+    color: String
+    number: Int
+}
+
+scalar JSON
+
+type Game {
+    id: Int!
+    players: [PlayerRef]!
+    currentRound: Round
+    scores: JSON
+    dealer: Int!
+    roundHistory: JSON!
+    winner: Int
+}
+
+type Query {
+    activeGames: [Game]!
+    pendingGames: [Game]!
+}
+
+type Mutation {
+    createGame: Game!
+    addPlayer(gameId: Int!, playerName: String!): Game!
+    removePlayer(gameId: Int!, playerId: Int!): Game
+    startRound(gameId: Int!): Game!
+    playCard(gameId: Int!, cardId: Int!, chosenColor: String): Game!
+    drawCard(gameId: Int!): Game!
+    unoCall(gameId: Int!, playerId: Int!): Game!
+    accuseUno(gameId: Int!, accuser: Int!, accused:Int!): Game!
+    challengeDraw4(gameId: Int!, response: Boolean!): Boolean!
+    canPlay(gameId: Int! ,cardId: Int!): Boolean!
+    changeWildCardColor(gameId: Int!, chosenColor: String!): Game!
+}
+
+# The new, event-based subscription system.
+type Subscription {
+  activeGamesFeed: GameListUpdate!
+  pendingGamesFeed: GameListUpdate!
+}
