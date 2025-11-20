@@ -4,7 +4,7 @@ import './PlayerHand.css'
 
 type PlayerHandProps = {
   cards: CardSpecs[]
-  onPlay?: (index: number) => void
+  onPlay: (index: number) => void
 }
 
 const cardStyle = (index: number, total: number) => {

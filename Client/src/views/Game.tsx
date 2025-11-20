@@ -67,7 +67,7 @@ const Game = () => {
     Boolean(game && round && myPlayer) &&
     round!.currentPlayer === myPlayer!.playerName
 
-  const dispatchAny: any = dispatch
+
 
   const handleDraw = useCallback(() => {
     if (!game || !round || !myPlayer || !canDraw) return
@@ -76,9 +76,17 @@ const Game = () => {
 
   const handlePlay = useCallback(
     async (cardIndex: number) => {
-      if (!game || !round || !myPlayer) return
+      if (!game || !round || !myPlayer) {
+        alert('Unable to play: missing game, round, or player.');
+        return
+      }
+
+      if (round.currentPlayer !== myPlayer.playerName) {
+        return
+      }
+
       try {
-        const playable = await dispatchAny(CanPlayThunk(game.id, cardIndex))
+        const playable = await dispatch(CanPlayThunk(game.id, cardIndex))
         if (!playable) return
         dispatch(
           PlayCardThunk({
@@ -90,7 +98,7 @@ const Game = () => {
         console.error('Unable to play card', error)
       }
     },
-    [game, round, myPlayer, dispatchAny, dispatch]
+    [game, round, myPlayer, dispatch, dispatch]
   )
 
   const handleUno = useCallback(() => {
