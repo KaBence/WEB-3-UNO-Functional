@@ -1,6 +1,8 @@
 import { useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
+import StatusBar from "../components/Statusbar"
+import PlayersBar from "../components/OtherPlayerBar"
 import DrawPile from '../components/game/DrawPile'
 import DiscardPile from '../components/game/DiscardPile'
 import PlayerHand from '../components/game/PlayerHand'
@@ -11,11 +13,41 @@ import type { State, Dispatch as AppDispatch } from '../stores/store'
 import { PlayerNames } from 'Domain/src/model/Player'
 import { Direction } from 'Domain/src/model/round'
 import { Colors, Type } from 'Domain/src/model/Card'
+import type { Dispatch } from "../stores/store";
+import type { AnyAction } from "@reduxjs/toolkit";
 import DrawCardThunk from '../thunks/DrawCardThunk'
 import PlayCardThunk from '../thunks/PlayCardThunk'
 import CanPlayThunk from '../thunks/CanPlayThunk'
 import UnoCallThunk from '../thunks/UnoCallThunk'
 import './Game.css'
+
+const mockPlayers = [
+  {
+    name: "Alice",
+    unoCalled: false,
+    playerName: PlayerNames.player1,
+    hand: [
+      { type: Type.Numbered, color: Colors.Red, number: 5 as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 },
+      { type: Type.Numbered, color: Colors.Blue, number: 7 as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 },
+      { type: Type.Numbered, color: Colors.Green, number: 2 as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 },
+    ],
+  },
+  {
+    name: "Bob",
+    unoCalled: false,
+    playerName: PlayerNames.player2,
+    hand: [
+      { type: Type.Numbered, color: Colors.Yellow, number: 1 as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 },
+      { type: Type.Numbered, color: Colors.Red, number: 3 as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 },
+    ],
+  },
+];
+
+
+const mockDispatch: Dispatch = ((action: AnyAction | any) => {
+  console.log("dispatch called:", action);
+  return action;   // ważne! dispatch musi coś zwracać, np. samą akcję
+}) as Dispatch;
 
 const fallbackHand: CardSpecs[] = []
 
@@ -160,6 +192,8 @@ const Game = () => {
         game={game}
         myPlayerId={myPlayer?.playerName ?? PlayerNames.player1}
       />
+       <StatusBar message="Test" isYourTurn={true} arrowAngle={180} score={120}/>
+        <PlayersBar players={mockPlayers} gameId={1} currentPlayerId={1} dispatch={mockDispatch}/>
     </div>
   )
 }

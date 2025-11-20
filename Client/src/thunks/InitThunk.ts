@@ -7,6 +7,6 @@ export default async (dispatch: Dispatch) => {
     const games = await api.getActiveGames();
     dispatch(active_games_slice.actions.reset(games))
     
-    const pending_games = await api.getPendingGames();
-    dispatch(pending_games_slice.actions.reset(pending_games))
+    //const pending_games = await api.getPendingGames();
+    //dispatch(pending_games_slice.actions.reset(pending_games))
 }

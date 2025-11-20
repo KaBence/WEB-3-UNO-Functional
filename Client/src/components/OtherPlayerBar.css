@@ -1,0 +1,68 @@
+.players-bar {
+display: flex;
+justify-content: center;
+gap: 40px;
+background: #f7f7f7;
+}
+
+.player-column {
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+
+.player-name {
+text-align: center;
+width: 100;
+font-weight: bold;
+color: black;
+margin-bottom: 10px;
+}
+
+.player-hand {
+position: relative;
+height: 160px;
+width: 200px;
+display: flex;
+justify-content: center;
+}
+
+.card {
+width: 80px;
+height: 120px;
+border-radius: 8px;
+border: 2px solid #000;
+position: absolute;
+background-size: cover;
+background-position: center;
+box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.card.back {
+background-image: url("../../../public/backsideUnoCard.ico"); 
+}
+
+.call-uno button{
+background: linear-gradient(135deg, #000000, #ff1a1a); /* black → red */
+color: #fff;
+font-weight: 900;
+text-transform: uppercase;
+font-size: 0.9rem; /* smaller text */
+border: none;
+border-radius: 30px; /* smaller radius for smaller button */
+padding: 0.5rem 1.5rem; /* less padding */
+cursor: pointer;
+letter-spacing: 0.5px; /* tighter spacing */
+box-shadow: 0 3px 0 #660000;
+transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.call-uno :hover {
+transform: translateY(-2px);
+box-shadow: 0 4px 0 #660000;
+}
+
+.call-uno :active {
+transform: translateY(2px);
+box-shadow: 0 1px 0 #660000;
+}

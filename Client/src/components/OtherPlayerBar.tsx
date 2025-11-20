@@ -1,3 +1,5 @@
+import "./OtherPLayerBar.css"
+
 import accuseUnoThunk from "../thunks/AccuseUNOThunk";
 import type { Dispatch } from "../stores/store";
 import type { PlayerSpecs } from "../model/game";
