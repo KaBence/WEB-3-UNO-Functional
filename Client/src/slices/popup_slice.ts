@@ -35,18 +35,18 @@ const initialState: PopupState = {
 };
 
 const popupReducers = {
-  openChallenge(_state: PopupState) {
-    return { ..._state, showChallenge: true };
+  openChallenge(state: PopupState) {
+    return { ...state, showChallenge: true };
   },
-  closeChallenge(_state: PopupState) {
-    return { ..._state, showChallenge: false };
+  closeChallenge(state: PopupState) {
+    return { ...state, showChallenge: false };
   },
   openChallengeResultSnapshot(
-    _state: PopupState,
+    state: PopupState,
     action: PayloadAction<{ result: boolean; challengedPlayerId: PlayerNames; handBeforeDraw: CardSpecs[] }>
   ) {
     return {
-      ..._state,
+      ...state,
       showChallengeResult: true,
       challengeResult: action.payload.result,
       challengeContext: {
@@ -55,26 +55,26 @@ const popupReducers = {
       },
     };
   },
-  setChallengeResult(_state: PopupState, action: PayloadAction<boolean>) {
-    return { ..._state, challengeResult: action.payload };
+  setChallengeResult(state: PopupState, action: PayloadAction<boolean>) {
+    return { ...state, challengeResult: action.payload };
   },
-  closeChallengeResult(_state: PopupState) {
-    return { ..._state, showChallengeResult: false, challengeContext: undefined };
+  closeChallengeResult(state: PopupState) {
+    return { ...state, showChallengeResult: false, challengeContext: undefined };
   },
-  openColorChange(_state: PopupState) {
-    return { ..._state, showColorChange: true };
+  openColorChange(state: PopupState) {
+    return { ...state, showColorChange: true };
   },
-  closeColorChange(_state: PopupState) {
-    return { ..._state, showColorChange: false };
+  closeColorChange(state: PopupState) {
+    return { ...state, showColorChange: false };
   },
-  setColorSelected(_state: PopupState, action: PayloadAction<string>) {
-    return { ..._state, colorSelected: action.payload };
+  setColorSelected(state: PopupState, action: PayloadAction<string>) {
+    return { ...state, colorSelected: action.payload };
   },
-  openPlay(_state: PopupState) {
-    return { ..._state, showPlay: true };
+  openPlay(state: PopupState) {
+    return { ...state, showPlay: true };
   },
-  closePlay(_state: PopupState) {
-    return { ..._state, showPlay: false };
+  closePlay(state: PopupState) {
+    return { ...state, showPlay: false };
   },
 };
 
