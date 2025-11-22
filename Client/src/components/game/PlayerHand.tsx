@@ -25,7 +25,7 @@ const PlayerHand = ({ cards, onPlay }: PlayerHandProps) => {
           card={card}
           className='hand-card'
           style={cardStyle(index, cards.length)}
-          onClick={onPlay ? () => onPlay(index) : undefined}
+          onClick={onPlay ? () => onPlay(index) : undefined} //
         />
       ))}
     </div>
