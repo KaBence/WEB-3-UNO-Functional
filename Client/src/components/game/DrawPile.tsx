@@ -2,7 +2,7 @@ import './DrawPile.css'
 
 type DrawPileProps = {
   cardsLeft: number
-  onDraw?: () => void
+  onDraw: () => void
 }
 
 const DrawPile = ({ cardsLeft, onDraw }: DrawPileProps) => {

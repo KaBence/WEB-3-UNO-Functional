@@ -65,8 +65,6 @@ const mockDispatch: Dispatch = ((action: AnyAction | any) => {
   return action;
 }) as Dispatch;
 
-const fallbackHand: CardSpecs[] = []
-
 const placeholderRound: RoundSpecs = {
   players: [] as PlayerSpecs[],
   drawDeckSize: 0,
@@ -85,67 +83,52 @@ const Game = () => {
   const { id } = useParams<{ id?: string }>()
   const dispatch: AppDispatch = useDispatch()
   const activeGames = useSelector((state: State) => state.active_games)
-  const playerName = useSelector((state: State) => state.player.player)
+  const player = useSelector((state: State) => state.player)
 
   const numericId = id ? Number(id) : undefined
   const game = useMemo(() => {
     if (numericId !== undefined && Number.isFinite(numericId)) {
       return activeGames.find((g) => g.id === numericId)
     }
-    return activeGames[0]
   }, [activeGames, numericId])
 
   const round = game?.currentRound
 
   const myPlayer = useMemo(() => {
     if (!round || round.players.length === 0) return undefined
-    if (playerName) {
-      return round.players.find((p) => p.name === playerName) ?? round.players[0]
+    if (player.playerName) {
+      return round.players.find((p) => p.playerName === player.playerName) ?? undefined
     }
-    return round.players[0]
-  }, [playerName, round])
+    return undefined
+  }, [player, round])
 
-  const myHand: CardSpecs[] = myPlayer?.hand ?? fallbackHand
+  const myHand: CardSpecs[] = myPlayer?.hand ?? []
   const statusMessage = round?.statusMessage ?? 'Waiting for players...'
   const currentDirection = round?.currentDirection ?? Direction.Clockwise
-  const drawDeckSize = round?.drawDeckSize ?? 0
   const topCard = round?.topCard ?? placeholderRound.topCard
 
-  const canDraw =
-    Boolean(game && round && myPlayer) &&
-    round!.currentPlayer === myPlayer!.playerName
-
-
+  const isMyTurn = Boolean(game && round) && round!.currentPlayer === player.playerName
 
   const handleDraw = useCallback(() => {
-    if (!game || !round || !myPlayer || !canDraw) return
+    if (!game || !round || !myPlayer || !isMyTurn) return
     dispatch(DrawCardThunk(game.id))
-  }, [dispatch, game, round, myPlayer, canDraw])
+  }, [dispatch, game, round, myPlayer, isMyTurn])
 
   const handlePlay = useCallback(
     async (cardIndex: number) => {
       if (!game || !round || !myPlayer) {
-        
         throw new Error('Unable to play card: game, round, or player info missing')
-        
       }
-
-      if (round.currentPlayer !== myPlayer.playerName) {
-        return
+      if (!isMyTurn) {
+        throw new Error('Not your turn')
       }
 
       try {
         const playable = await dispatch(CanPlayThunk(game.id, cardIndex))
-        if (!playable) 
-  
-        throw new Error('Card is not playable') 
-       
-        dispatch(
-          PlayCardThunk({
-            gameId: game.id,
-            cardId: cardIndex
-          })
-        )
+        if (!playable) {
+          throw new Error('Card is not playable')
+        }
+        dispatch(PlayCardThunk({ gameId: game.id, cardId: cardIndex }))
       } catch (error) {
         console.error('Unable to play card', error)
       }
@@ -158,7 +141,7 @@ const Game = () => {
     dispatch(UnoCallThunk(game.id, myPlayer.playerName))
   }, [dispatch, game, myPlayer])
 
-  const canCallUno = Boolean(game && myPlayer && myHand.length <= 2 && !myPlayer.unoCalled)
+  const canCallUno = Boolean(game && myPlayer && myHand.length <= 2 && !myPlayer.unoCalled) //Didn't we say we can call UNO anytime?
 
   const boardRound = round ?? placeholderRound
 
@@ -166,23 +149,23 @@ const Game = () => {
     <div className='game-view'>
       <div className='game-board-area'>
         <div className='status-bar'>
-          <StatusBar message="Test" isYourTurn={true} arrowAngle={180} score={120}/>
+          <StatusBar message={statusMessage} isYourTurn={true} arrowAngle={180} score={120} />
         </div>
         <div className='player-bar'>
-          <PlayersBar players={mockPlayers} gameId={1} currentPlayerId={1} dispatch={mockDispatch}/>
+          <PlayersBar players={mockPlayers} gameId={1} currentPlayerId={1} dispatch={mockDispatch} />
         </div>
         <section className='tabletop'>
           <div className='pile-section'>
             <DrawPile
               cardsLeft={boardRound.drawDeckSize}
-              onDraw={canDraw ? handleDraw : undefined}
+              onDraw={handleDraw}
             />
             <span className='pile-label'>Draw pile</span>
           </div>
 
           <div className='table-info'>
             <div className='direction-pill'>Direction: {currentDirection}</div>
-            <div className='deck-size'>Cards left: {drawDeckSize}</div>
+            <div className='deck-size'>Cards left: {boardRound.drawDeckSize}</div>
           </div>
 
           <div className='pile-section'>
@@ -209,11 +192,11 @@ const Game = () => {
       </div>
       <GameStatus
         game={game}
-        myPlayerId={myPlayer?.playerName ?? PlayerNames.player1}
+        myPlayerId={player.playerName ?? PlayerNames.player1}
       />
       <PlayPopup gameId={1} cardIndex={0} newCard={{ type: Type.Numbered, color: Colors.Red, number: 7 }} />
-      <ChooseColorPopup gameId={1} cardIndex={1}/>
-      <ChallengePopup gameId={1} /> 
+      <ChooseColorPopup gameId={1} cardIndex={1} />
+      <ChallengePopup gameId={1} />
       <ChallengeResultPopup />
     </div>
   )
