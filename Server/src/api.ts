@@ -23,8 +23,8 @@ export type GameAPI = {
   changeWildCardColor(gameId: number, chosenColor: string): Promise<Game>;
 };
 
-export function createGameAPI(broadcaster: Broadcaster, store: GameStore): GameAPI {
-  const server = new ServerModel(store);
+export function createGameAPI(broadcaster: Broadcaster, server: GameStore): GameAPI {
+ 
 
   async function getPendingGames(): Promise<Game[]> {
     return await server.all_pending_games();
