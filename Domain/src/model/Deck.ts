@@ -49,7 +49,7 @@ export function peek(deck: Deck): [Card | undefined, Deck] {
         return [undefined, deck];
     }
     const topCard = _.last(deck.cards)
-    return [topCard, { ...deck, cards: deck.cards }]
+    return [topCard, deck]
 }
 
 // Enums

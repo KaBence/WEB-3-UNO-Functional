@@ -1,6 +1,6 @@
 import type { Game } from "Domain/src/model/Game";
 import * as  ServerModel  from "./serverModel";
-import type { GameStore } from "./store/GameStore";
+import type { GameStore } from "./memoryStore";
 
 interface Broadcaster {
   gameAdded(game: Game): void;
@@ -12,7 +12,7 @@ export type GameAPI = {
   getPendingGames(): Promise<Game[]>;
   getActiveGames(): Promise<Game[]>;
   createGame(): Promise<Game>;
-  addPlayer(gameId: number, playerName: string): Promise<Game | undefined>;
+  addPlayer(gameId: number, playerName: string): Promise<Game>;
   removePlayer(gameId: number, playerId: number): Promise<Game | undefined>;
   startRound(gameId: number): Promise<Game>;
   playCard(gameId: number, cardId: number, chosenColor?: string): Promise<Game>;
@@ -30,18 +30,19 @@ export function createGameAPI(broadcaster: Broadcaster, store: GameStore): GameA
 
     
   async function getPendingGames(): Promise<Game[]> {
-    return await store.all_pending_games();
+    const games = await store.getAllGames();
+    return games.filter((m) => m.currentRound == undefined)
   }
 
   async function getActiveGames(): Promise<Game[]> {
-    return await store.all_active_games();
-
+    const games = await store.getAllGames();
+    return games.filter((m) => m.currentRound !== undefined)
   }
 
   async function createGame(): Promise<Game> {
     const id  = (await getPendingGames()).length + (await getActiveGames()).length + 1; //very interesting mathematics 
     const game =  ServerModel.createGame(id);
-    const created = await store.add_pending(game);
+    const created = await store.saveGame(game);
     broadcaster.gameAdded(game);
     return created;
   }
@@ -50,11 +51,10 @@ export function createGameAPI(broadcaster: Broadcaster, store: GameStore): GameA
     const current = await store.getGame(gameId);
     if (!current) throw new Error(`Game ${gameId} not found`);
     const next = await processor(current);
-    await store.saveGame(next);
-    return next;
+    return await store.saveGame(next);
   }
 
-  async function addPlayer(  gameId: number, playerName: string): Promise<Game | undefined> {
+  async function addPlayer(  gameId: number, playerName: string): Promise<Game> {
     const updated = await update(gameId, (g) => ServerModel.addPlayer(playerName ,g));
     broadcaster.gameUpdated(updated);
     return updated;
@@ -71,8 +71,7 @@ export function createGameAPI(broadcaster: Broadcaster, store: GameStore): GameA
       broadcaster.gameRemoved(gameId, wasPending ? "pending" : "active");
       return undefined;
     }
-    //maybe wrong should accept a function
-    await update(gameId, (next));
+    await update(gameId, () => next);
     broadcaster.gameUpdated(next);
     return next;
   }
@@ -85,7 +84,7 @@ export function createGameAPI(broadcaster: Broadcaster, store: GameStore): GameA
   }
 
   async function playCard(gameId: number, cardId: number, chosenColor?: string): Promise<Game> {
-    const updated = await update(gameId, (g) => ServerModel.play( cardId, chosenColor, g));
+    const updated = await update(gameId, (g) => ServerModel.play( {cardId, chosenColor}, g));
     broadcaster.gameUpdated(updated);
     return updated;
   }
@@ -111,9 +110,8 @@ export function createGameAPI(broadcaster: Broadcaster, store: GameStore): GameA
   async function challengeDraw4(gameId: number, response: boolean): Promise<boolean> {
     const current = await store.getGame(gameId);
     if (!current) return false;
-    const { result, game } =  ServerModel.challangeDrawFour( response, current);
-    //msybe wrong should accept a function
-    await update(gameId, game);
+    const [ game,result ] =  ServerModel.challangeDrawFour( response, current);
+    await update(gameId, () => game);
     broadcaster.gameUpdated(game);
     return result;
   }
@@ -121,11 +119,11 @@ export function createGameAPI(broadcaster: Broadcaster, store: GameStore): GameA
   async function canPlay(gameId: number, cardId: number): Promise<boolean> {
     const current = await store.getGame(gameId);
     if (!current) return false;
-    return  ServerModel.canPlay( cardId, current);
+    return  ServerModel.canPlay(cardId, current);
   }
 
   async function changeWildCardColor(gameId: number, chosenColor: string): Promise<Game> {
-    const updated = await update(gameId, (g) => ServerModel.changeWildCardColor(g, chosenColor));
+    const updated = await update(gameId, (g) => ServerModel.changeWildCardColor(chosenColor,g));
     broadcaster.gameUpdated(updated);
     return updated;
   }

@@ -29,30 +29,34 @@ export type Round = {
 export function initializeRound(players: Player[], dealer: number): Round {
   let drawPile = deckFactory.createNewDrawDeck();
 
+  // Work on clones to avoid mutating input
   let playersWithCards = _.cloneDeep(players);
   let remainingDeck = _.cloneDeep(drawPile);
-  let newPlayers: Player[] = []
 
+  // Deal 7 cards to each player, updating the deck each time
   for (let i = 0; i < 7; i++) {
-    playersWithCards.forEach((p) => {
-      const cardToDeal = deck.deal(remainingDeck);
-
+    for (let idx = 0; idx < playersWithCards.length; idx++) {
+      const [cardToDeal, nextDeck] = deck.deal(remainingDeck);
+      remainingDeck = nextDeck;
       if (cardToDeal) {
-        newPlayers.push(player.addCardToPlayerHand(cardToDeal[0]!,p))  // Mutates the cloned player that is adding the card to players hand
+        const updatedPlayer = player.addCardToPlayerHand(cardToDeal, playersWithCards[idx]);
+        playersWithCards[idx] = updatedPlayer;
       }
-    });
+    }
   }
 
-  drawPile = remainingDeck;
-  const discardPile = deckFactory.createDiscardDeck(deck.deal(drawPile)[0])
-
+  // Flip the first discard card from the remaining draw deck
+  const [firstDiscard, nextDrawPile] = deck.deal(remainingDeck);
+  const discardPile = deckFactory.createDiscardDeck(firstDiscard);
+  
+  const [topcard,discardDeck] = deck.peek(discardPile)
   const initialState: Round = {
     players: playersWithCards,
     currentDirection: Direction.Clockwise,
     currentPlayer: (dealer + 1) % players.length,
-    drawPile: drawPile,
+    drawPile: nextDrawPile,
     discardPile: discardPile,
-    topCard: deck.peek(discardPile)[0]!,
+    topCard: topcard!,
     statusMessage: "A new round has begun!",
     winner: undefined,
   };
@@ -61,7 +65,7 @@ export function initializeRound(players: Player[], dealer: number): Round {
 };
 
 export function getSpecificPlayer(player: player.PlayerNames, oldRound: Round): Player {
-  return oldRound.players.find((p) => p.id === player)!
+  return oldRound.players.find((p) => p.playerName === player)!
 }
 
 
@@ -113,8 +117,9 @@ export function catchUnoFailure(accuser: player.PlayerNames, accused: player.Pla
   }
 }
 
-export function canPlay(playedCard: Card, oldRound: Round): boolean {
+export function canPlay(cardId: number, oldRound: Round): boolean {
   const topCard = oldRound.topCard
+  const playedCard = getSpecificPlayer(oldRound.currentPlayer, oldRound ).hand[cardId]
   switch (playedCard.Type) {
     case card.Type.Reverse:
     case card.Type.Draw:
@@ -158,10 +163,9 @@ export function sayUno(playerId: player.PlayerNames, oldRound: Round): Round {
     const specificPlayer = getSpecificPlayer(playerId, oldRound)
     const playersHand = specificPlayer.hand
     if (playersHand.length === 2) {
-      const card = [playersHand[0], playersHand[1]]
-      if (canPlay(card[0], oldRound) || canPlay(card[1], oldRound)) {
+      if (canPlay(0, oldRound) || canPlay(1, oldRound)) {
         const newPlayer = player.setUno(true, specificPlayer)
-        const newPlayersArray = oldRound.players.map(p => p.id === newPlayer.id ? newPlayer : p)
+        const newPlayersArray = oldRound.players.map(p => p.playerName === newPlayer.playerName ? newPlayer : p)
         const message = specificPlayer.name + " called UNO!"
         return {...oldRound, players: newPlayersArray, statusMessage: message}
       }
@@ -177,7 +181,7 @@ export function sayUno(playerId: player.PlayerNames, oldRound: Round): Round {
       return {...updated, statusMessage: message}
     }
     const newPlayer = player.setUno(true, specificPlayer)
-    const newPlayersArray = oldRound.players.map(p => p.id === newPlayer.id ? newPlayer : p)
+    const newPlayersArray = oldRound.players.map(p => p.playerName === newPlayer.playerName ? newPlayer : p)
     const message = specificPlayer.name + " called UNO!"
     return {...oldRound, players: newPlayersArray, statusMessage: message}
 
@@ -185,23 +189,23 @@ export function sayUno(playerId: player.PlayerNames, oldRound: Round): Round {
 
 function getNextPlayer(oldRound: Round): player.PlayerNames {
     if (oldRound.currentDirection === Direction.Clockwise) {
-      const index = (oldRound.players.findIndex((p) => p.id === oldRound.currentPlayer) + 1) % oldRound.players.length
-      return oldRound.players[index].id
+      const index = (oldRound.players.findIndex((p) => p.playerName === oldRound.currentPlayer) + 1) % oldRound.players.length
+      return oldRound.players[index].playerName
     }
     else {
-      const index = (oldRound.players.findIndex((p) => p.id === oldRound.currentPlayer) - 1 + oldRound.players.length) % oldRound.players.length
-      return oldRound.players[index].id
+      const index = (oldRound.players.findIndex((p) => p.playerName === oldRound.currentPlayer) - 1 + oldRound.players.length) % oldRound.players.length
+      return oldRound.players[index].playerName
     }
 }
 
 function getPreviousPlayer(oldRound: Round): player.PlayerNames {
     if (oldRound.currentDirection === Direction.Clockwise) {
-      const index = (oldRound.players.findIndex((p) => p.id === oldRound.currentPlayer) - 1  + oldRound.players.length) % oldRound.players.length
-      return oldRound.players[index].id
+      const index = (oldRound.players.findIndex((p) => p.playerName === oldRound.currentPlayer) - 1  + oldRound.players.length) % oldRound.players.length
+      return oldRound.players[index].playerName
     }
     else {
-      const index = (oldRound.players.findIndex((p) => p.id === oldRound.currentPlayer) + 1) % oldRound.players.length
-      return oldRound.players[index].id
+      const index = (oldRound.players.findIndex((p) => p.playerName === oldRound.currentPlayer) + 1) % oldRound.players.length
+      return oldRound.players[index].playerName
     }
 }
 
@@ -331,7 +335,7 @@ export function playerAction(card: Card, playerId: player.PlayerNames, oldRound:
   const playerUnoFalse = player.setUno(false, playerForThisTurn)
   const updatedPlayer = player.addCardToPlayerHand(card, playerUnoFalse)
 
-  const newPlayersArray = oldRound.players.map(p => p.id === playerId ? updatedPlayer : p)
+  const newPlayersArray = oldRound.players.map(p => p.playerName === playerId ? updatedPlayer : p)
 
   return { ...oldRound, players: newPlayersArray }
 }
@@ -343,7 +347,7 @@ export function playIfAllowed(opts: { cardId: number, color?: card.Colors }, rou
     return round
   }
   const color = opts.color
-  return canPlay(playedCard, round) ? play({ playedCard, color }, round) : round
+  return canPlay(opts.cardId, round) ? play({ playedCard, color }, round) : round
 }
 
 export function play(opts: { playedCard: Card, color?: card.Colors }, round: Round): Round {
@@ -387,6 +391,6 @@ export function handleSpecialCards(opts: { playedCard: Card, color?: card.Colors
 }
 
   export function removePlayer(playerId: number, oldRound:Round): Round {
-    const updatedPlayers = oldRound.players.filter(p => p.id !== playerId);
+    const updatedPlayers = oldRound.players.filter(p => p.playerName !== playerId);
     return {...oldRound, players: updatedPlayers}
   }

@@ -31,13 +31,13 @@ export function addPlayer(name: string, g: Game): Game {
   const nextId = g.players.length + 1;
   return {
     ...g,
-    players: [...g.players, playerFactory.createPlayer(nextId, name)],
+    players: [...g.players, { playerName: nextId, name }],
     scores: { ...g.scores, [nextId]: 0 },
   };
 }
 
 export function removePlayer(playerId: PlayerId, g: Game): Game {
-  const players = g.players.filter(p => p.id !== playerId);
+  const players = g.players.filter(p => p.playerName !== playerId);
   if (players.length === g.players.length) return g;
   const { [playerId]: _drop, ...rest } = g.scores;
   const currentRound = g.currentRound //? roundRemovePlayer(g.currentRound, playerId) : undefined;
@@ -103,7 +103,7 @@ export function createRound(g: Game): Game {
 
   //  decide dealer on the Game
   const withDealer = chooseDealer(g);
-  const fullPlayers = g.players.map((ref) => playerFactory.createPlayer(ref.id, ref.name))
+  const fullPlayers = g.players.map((ref) => playerFactory.createPlayer(ref.playerName, ref.name))
 
   //  start a round based on players + dealer
   const round = RoundFactory.createNewRound(fullPlayers, withDealer.dealer);
@@ -139,7 +139,7 @@ export function roundFinished(g: Game): Game {
   const r = g.currentRound;
   if (!r || !roundHasWinner(r)) return g;
 
-  const wId = roundHasWinner(r).winner?.id;
+  const wId = roundHasWinner(r).winner?.playerName;
   const wName = roundHasWinner(r).winner?.name;
   if (wId === undefined || !wName) return g;
 

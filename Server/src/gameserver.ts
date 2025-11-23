@@ -14,7 +14,7 @@ import { MemoryStore } from "./memoryStore";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { useServer } from "graphql-ws/use/ws";
 import { PubSub } from "graphql-subscriptions";
-import { GameAPI } from "./api";
+import { createGameAPI } from "./api";
 import { create_Resolvers } from "./resolvers";
 import { Game } from "Domain/src/model/Game";
 
@@ -58,7 +58,7 @@ async function startServer(store: MemoryStore) {
     }
   };
 
-  const api = create_api(broadcaster, store)
+  const api = createGameAPI(broadcaster, store)
 
   try {
     const content = await fs.readFile("./UNO.sdl", "utf8");

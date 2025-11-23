@@ -37,9 +37,9 @@ type Round {
 }
 
 type Card {
-    type: String!
-    color: String
-    number: Int
+    Type: String!
+    Color: String
+    CardNumber: Int
 }
 
 scalar JSON

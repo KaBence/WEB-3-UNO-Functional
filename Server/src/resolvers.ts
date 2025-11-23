@@ -1,5 +1,33 @@
 import { PubSub } from "graphql-subscriptions";
 import { GameAPI } from "./api";
+import { Game } from "Domain/src/model/Game";
+import { Round } from "domain/src/model/Round"
+
+export function toGraphQLRound(round?:Round){
+  if(!round) return undefined
+  console.log(round.topCard.Type)
+  return {
+    players: round.players,
+    currentDirection: round.currentDirection,
+    currentPlayer: round.currentPlayer,
+    drawDeckSize: round.drawPile.cards.length,
+    topCard: round.topCard,
+    statusMessage: round.statusMessage,
+    winner: round.winner
+  }
+}
+
+export function toGraphQLGame(Game:Game){
+ return{
+    id: Game.id,
+    players: Game.players,
+    currentRound: toGraphQLRound(Game.currentRound),
+    scores: Game.scores,
+    dealer: Game.dealer,
+    roundHistory: Game.roundHistory,
+    winner: Game.winner
+ }
+}
 
 export const create_Resolvers = (pubsub: PubSub, api: GameAPI) => {
   return {
@@ -13,40 +41,43 @@ export const create_Resolvers = (pubsub: PubSub, api: GameAPI) => {
     },
     Mutation: {
       createGame: async () => {
-        return await api.createGame();
+        return toGraphQLGame(await api.createGame());
       },
       addPlayer: async (
         _: any,
         { gameId, playerName }: { gameId: number; playerName: string }
       ) => {
-        return await api.addPlayer(gameId, playerName);
+        return toGraphQLGame(await api.addPlayer(gameId, playerName));
       },
       removePlayer: async (
         _: any,
         { gameId, playerId }: { gameId: number; playerId: number }
       ) => {
-        return await api.removePlayer(gameId, playerId);
+        const game = await api.removePlayer(gameId, playerId);
+        if (game)
+          return toGraphQLGame(game)
+        return undefined
       },
       startRound: async (_: any, { gameId }: { gameId: string }) => {
-        return await api.startRound(parseInt(gameId));
+        return toGraphQLGame(await api.startRound(parseInt(gameId)));
       },
       playCard: async (
         _: any,
         { gameId, cardId, chosenColor }: { gameId: number; cardId: number; chosenColor: string }
       ) => {
-        return await api.playCard(gameId, cardId, chosenColor);
+        return toGraphQLGame(await api.playCard(gameId, cardId, chosenColor));
       },
       drawCard: async (_: any, { gameId }: { gameId: string }) => {
-        return await api.drawCard(parseInt(gameId));
+        return toGraphQLGame(await api.drawCard(parseInt(gameId)));
       },
       unoCall: async (_: any, { gameId, playerId }: { gameId: number; playerId: number }) => {
-        return await api.unoCall(gameId, playerId);
+        return toGraphQLGame(await api.unoCall(gameId, playerId));
       },
       accuseUno: async (
         _: any,
         { gameId, accuser, accused }: { gameId: number; accuser: number; accused: number }
       ) => {
-        return await api.accuseUno(gameId, accuser, accused);
+        return toGraphQLGame(await api.accuseUno(gameId, accuser, accused));
       },
       challengeDraw4: async (_: any, { gameId, response }: { gameId: number; response: boolean }) => {
         return await api.challengeDraw4(gameId, response);
@@ -58,7 +89,7 @@ export const create_Resolvers = (pubsub: PubSub, api: GameAPI) => {
         _: any,
         { gameId, chosenColor }: { gameId: number; chosenColor: string }
       ) => {
-        return await api.changeWildCardColor(gameId, chosenColor);
+        return toGraphQLGame(await api.changeWildCardColor(gameId, chosenColor));
       },
     },
     Subscription: {

@@ -2,7 +2,10 @@ import * as _ from 'lodash';
 import type { Card, Cards } from './Card';
 
 export type PlayerId = number;
-export type PlayerRef = { id: PlayerId; name: string };
+export type PlayerRef = { 
+    readonly playerName: PlayerId; 
+    readonly name: string; 
+};
 
 export enum PlayerNames {
     player1 = 1,
@@ -17,9 +20,7 @@ export enum PlayerNames {
     player10 = 10
 }
 
-export type Player = {
-    readonly id: PlayerNames;
-    readonly name: string;
+export type Player = PlayerRef & {
     readonly hand: Cards;
     readonly unoCalled: boolean;
 };

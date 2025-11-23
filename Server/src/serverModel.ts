@@ -9,25 +9,16 @@ export function createGame(gameId: number): Game {
    return gameFactory.newGame(gameId)
 }
 
-export function addPlayer(player: string, oldGame: Game): Game | undefined {
-    if(!oldGame) {
-        throw new Error("Game doesnt exist"); //idk what to do here
-        return undefined
-    }
+export function addPlayer(player: string, oldGame: Game): Game  {
     const nameTaken = oldGame.players.some((p) => p.name === player)
     if(nameTaken) {
-        throw new Error("Player already in game"); //idk what to do here
         return oldGame
     }
     return game.addPlayer(player, oldGame)
 }
 
 export function removePlayer(player: number, oldGame: Game): Game | undefined {
-    if(!oldGame) {
-        throw new Error("Game doesnt exist"); //idk what to do here
-        return undefined
-    }
-    const playerExists = oldGame.players.some((p) => p.id === player)
+    const playerExists = oldGame.players.some((p) => p.playerName === player)
     if(!playerExists) {
         return oldGame
     }
@@ -45,10 +36,10 @@ export function startRound(oldGame: Game): Game {
     return game.createRound(oldGame)
 }
 
-export function play(opts: {card: Card, chosenColor?: string}, oldGame: Game): Game {
+export function play(opts: {cardId: number, chosenColor?: string}, oldGame: Game): Game {
     const desiredRound = oldGame.currentRound
     if(desiredRound) {
-        const newRound = round.play({playedCard: opts.card, color: opts.chosenColor as Colors}, desiredRound)
+        const newRound = round.playIfAllowed({cardId: opts.cardId, color: opts.chosenColor as Colors}, desiredRound)
         return {...oldGame, currentRound: newRound}
     }
     return oldGame
@@ -63,10 +54,10 @@ export function challangeDrawFour(response: boolean, oldGame: Game): [Game, bool
     return [oldGame, false]
 }
 
-export function canPlay(card: Card, oldGame: Game): boolean {
+export function canPlay(cardId: number, oldGame: Game): boolean {
     const desiredRound = oldGame.currentRound
     if(desiredRound) {
-        return round.canPlay(card, desiredRound)
+        return round.canPlay(cardId, desiredRound)
     }
     return false
 }

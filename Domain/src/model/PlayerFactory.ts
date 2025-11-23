@@ -6,7 +6,7 @@ export function createPlayer(
     name: string,
 ): Player {
     return {
-        id,
+        playerName: id,
         name,
         hand: [],
         unoCalled: false,
