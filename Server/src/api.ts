@@ -1,5 +1,6 @@
 import type { Game } from "Domain/src/model/Game";
-import { ServerModel, GameStore } from "./serverModel";
+import * as  ServerModel  from "./serverModel";
+import type { GameStore } from "./store/GameStore";
 
 interface Broadcaster {
   gameAdded(game: Game): void;
@@ -11,7 +12,7 @@ export type GameAPI = {
   getPendingGames(): Promise<Game[]>;
   getActiveGames(): Promise<Game[]>;
   createGame(): Promise<Game>;
-  addPlayer(gameId: number, playerName: string): Promise<Game>;
+  addPlayer(gameId: number, playerName: string): Promise<Game | undefined>;
   removePlayer(gameId: number, playerId: number): Promise<Game | undefined>;
   startRound(gameId: number): Promise<Game>;
   playCard(gameId: number, cardId: number, chosenColor?: string): Promise<Game>;
@@ -29,16 +30,16 @@ export function createGameAPI(broadcaster: Broadcaster, store: GameStore): GameA
 
     
   async function getPendingGames(): Promise<Game[]> {
-    return await ServerModel.all_pending_games();
+    return await store.all_pending_games();
   }
 
   async function getActiveGames(): Promise<Game[]> {
-    return await ServerModel.all_active_games();
+    return await store.all_active_games();
 
   }
 
   async function createGame(): Promise<Game> {
-    const id  = getPendingGames.length + getActiveGames.length + 3; //very interesting mathematics 
+    const id  = (await getPendingGames()).length + (await getActiveGames()).length + 1; //very interesting mathematics 
     const game =  ServerModel.createGame(id);
     const created = await store.add_pending(game);
     broadcaster.gameAdded(game);
@@ -46,10 +47,10 @@ export function createGameAPI(broadcaster: Broadcaster, store: GameStore): GameA
   }
 
   async function update(gameId: number, processor: (game: Game) => Game | Promise<Game>): Promise<Game> {
-    const current =  ServerModel.getGame(gameId);
+    const current = await store.getGame(gameId);
     if (!current) throw new Error(`Game ${gameId} not found`);
     const next = await processor(current);
-    await store.update(gameId, () => next);
+    await store.saveGame(next);
     return next;
   }
 
@@ -60,17 +61,17 @@ export function createGameAPI(broadcaster: Broadcaster, store: GameStore): GameA
   }
 
   async function removePlayer(gameId: number, playerId: number): Promise<Game | undefined> {
-    const before = await ServerModel.getGame(gameId);
+    const before = await store.getGame(gameId);
     if (!before) return undefined;
     const wasPending = !before.currentRound;
 
-    const next = await ServerModel.removePlayer( playerId, before);
+    const next = ServerModel.removePlayer( playerId, before);
     if (next === undefined) {
-      await store.delete(gameId);
+      await store.deleteGame(gameId);
       broadcaster.gameRemoved(gameId, wasPending ? "pending" : "active");
       return undefined;
     }
-    await store.update(gameId, () => next);
+    await update(gameId, (next));
     broadcaster.gameUpdated(next);
     return next;
   }
@@ -107,18 +108,18 @@ export function createGameAPI(broadcaster: Broadcaster, store: GameStore): GameA
   }
 
   async function challengeDraw4(gameId: number, response: boolean): Promise<boolean> {
-    const current = await ServerModel.getGame(gameId);
+    const current = await store.getGame(gameId);
     if (!current) return false;
-    const { result, game } = await ServerModel.challangeDrawFour( response, current);
-    await store.update(gameId, () => game);
+    const { result, game } =  ServerModel.challangeDrawFour( response, current);
+    await update(gameId, game);
     broadcaster.gameUpdated(game);
     return result;
   }
 
   async function canPlay(gameId: number, cardId: number): Promise<boolean> {
-    const current = await ServerModel.getGame(gameId);
+    const current = await store.getGame(gameId);
     if (!current) return false;
-    return await ServerModel.canPlay( cardId, current);
+    return  ServerModel.canPlay( cardId, current);
   }
 
   async function changeWildCardColor(gameId: number, chosenColor: string): Promise<Game> {
