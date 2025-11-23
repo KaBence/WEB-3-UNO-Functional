@@ -71,6 +71,7 @@ export function createGameAPI(broadcaster: Broadcaster, store: GameStore): GameA
       broadcaster.gameRemoved(gameId, wasPending ? "pending" : "active");
       return undefined;
     }
+    //maybe wrong should accept a function
     await update(gameId, (next));
     broadcaster.gameUpdated(next);
     return next;
@@ -111,6 +112,7 @@ export function createGameAPI(broadcaster: Broadcaster, store: GameStore): GameA
     const current = await store.getGame(gameId);
     if (!current) return false;
     const { result, game } =  ServerModel.challangeDrawFour( response, current);
+    //msybe wrong should accept a function
     await update(gameId, game);
     broadcaster.gameUpdated(game);
     return result;
