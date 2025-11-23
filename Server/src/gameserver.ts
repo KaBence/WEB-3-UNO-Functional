@@ -9,7 +9,6 @@ import { promises as fs } from "fs";
 import { WebSocketServer } from "ws";
 import cors from "cors";
 
-// import { GameStore } from "./serverModel";
 import { standardRandomizer } from "domain/src/utils/random_utils";
 import { MemoryStore } from "./memoryStore";
 import { makeExecutableSchema } from "@graphql-tools/schema";
