@@ -141,8 +141,6 @@ const Game = () => {
     dispatch(UnoCallThunk(game.id, myPlayer.playerName))
   }, [dispatch, game, myPlayer])
 
-  const canCallUno = Boolean(game && myPlayer && myHand.length <= 2 && !myPlayer.unoCalled) //Didn't we say we can call UNO anytime?
-
   const boardRound = round ?? placeholderRound
 
   return (
@@ -181,7 +179,7 @@ const Game = () => {
           </div>
           <PlayerHand cards={myHand} onPlay={handlePlay} />
           <div className='uno-button-wrapper'>
-            <UnoButton onClick={handleUno} disabled={!canCallUno}>
+            <UnoButton onClick={handleUno}>
               Call UNO
             </UnoButton>
           </div>

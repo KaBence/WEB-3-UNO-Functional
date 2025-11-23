@@ -3,7 +3,7 @@ import UnoCard from './UnoCard'
 import './DiscardPile.css'
 
 type DiscardPileProps = {
-  topCard?: CardSpecs //
+  topCard?: CardSpecs
 }
 
 const DiscardPile = ({ topCard }: DiscardPileProps) => {
