@@ -11,21 +11,61 @@ import cors from "cors";
 
 // import { GameStore } from "./serverModel";
 import { standardRandomizer } from "domain/src/utils/random_utils";
-// import { MemoryStore } from "./memoryStore";
+import { MemoryStore } from "./memoryStore";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { useServer } from "graphql-ws/use/ws";
 import { PubSub } from "graphql-subscriptions";
-// import { GameAPI } from "./api";
+import { GameAPI } from "./api";
 import { create_Resolvers } from "./resolvers";
 import { Game } from "Domain/src/model/Game";
 
-async function startServer() {
+async function startServer(store: MemoryStore) {
   const pubsub: PubSub = new PubSub()
+  const PENDING_GAMES_FEED = "pendingGamesFeed";
+  const ACTIVE_GAMES_FEED = "activeGamesFeed";
+  const broadcaster = {
+
+    gameAdded(game: Game) {
+      const topic = game.currentRound ? ACTIVE_GAMES_FEED : PENDING_GAMES_FEED;
+      pubsub.publish(topic, {
+        [topic]: {
+          action: 'ADDED',
+          gameId: game.id,
+          game: game
+        }
+      });
+    },
+
+    gameUpdated(game: Game) {
+      const topic = game.currentRound ? ACTIVE_GAMES_FEED : PENDING_GAMES_FEED;
+      pubsub.publish(topic, {
+        [topic]: {
+          action: 'UPDATED',
+          gameId: game.id,
+          game: game
+        }
+      });
+    },
+
+    gameRemoved(gameId: number, from: 'pending' | 'active') {
+      const topic = from === 'pending' ? PENDING_GAMES_FEED : ACTIVE_GAMES_FEED;
+      pubsub.publish(topic, {
+        [topic]: {
+          action: 'REMOVED',
+          gameId: gameId,
+          game: null // The game object is null, as required
+        }
+      });
+    }
+  };
+
+  const api = create_api(broadcaster, store)
+
   try {
     const content = await fs.readFile("./UNO.sdl", "utf8");
     const typeDefs = `#graphql
         ${content}`;
-    const resolvers = create_Resolvers()
+    const resolvers = create_Resolvers(pubsub, api);
     const app = express();
     app.use("/graphql", bodyParser.json());
 
@@ -78,7 +118,7 @@ async function startServer() {
 }
 
 function configAndStart() {
-  startServer();
+  startServer(new MemoryStore());
 }
 
 configAndStart();
