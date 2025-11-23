@@ -9,10 +9,10 @@ export function createGame(gameId: number): Game {
    return gameFactory.newGame(gameId)
 }
 
-export function addPlayer(oldGame: Game, player: string): Game | null {
+export function addPlayer(player: string, oldGame: Game): Game | undefined {
     if(!oldGame) {
         throw new Error("Game doesnt exist"); //idk what to do here
-        return null
+        return undefined
     }
     const nameTaken = oldGame.players.some((p) => p.name === player)
     if(nameTaken) {
@@ -22,10 +22,10 @@ export function addPlayer(oldGame: Game, player: string): Game | null {
     return game.addPlayer(player, oldGame)
 }
 
-export function removePlayer(oldGame: Game, player: number): Game | null {
+export function removePlayer(player: number, oldGame: Game): Game | undefined {
     if(!oldGame) {
         throw new Error("Game doesnt exist"); //idk what to do here
-        return null
+        return undefined
     }
     const playerExists = oldGame.players.some((p) => p.id === player)
     if(!playerExists) {
@@ -33,7 +33,7 @@ export function removePlayer(oldGame: Game, player: number): Game | null {
     }
     const newGame = game.removePlayer(player, oldGame)
     if(newGame.players.length === 0){
-        return null
+        return undefined
     }
     return newGame
 }
@@ -45,16 +45,16 @@ export function startRound(oldGame: Game): Game {
     return game.createRound(oldGame)
 }
 
-export function play(oldGame: Game, card: Card, chosenColor?: string): Game {
+export function play(opts: {card: Card, chosenColor?: string}, oldGame: Game): Game {
     const desiredRound = oldGame.currentRound
     if(desiredRound) {
-        const newRound = round.play({playedCard: card, color: chosenColor as Colors}, desiredRound)
+        const newRound = round.play({playedCard: opts.card, color: opts.chosenColor as Colors}, desiredRound)
         return {...oldGame, currentRound: newRound}
     }
     return oldGame
 }
 
-export function challangeDrawFour(oldGame: Game, response: boolean): [Game, boolean] {
+export function challangeDrawFour(response: boolean, oldGame: Game): [Game, boolean] {
     const desiredRound = oldGame.currentRound
     if(desiredRound) {
         const [result, newRound] = round.challengeWildDrawFour(response, desiredRound)
@@ -63,7 +63,7 @@ export function challangeDrawFour(oldGame: Game, response: boolean): [Game, bool
     return [oldGame, false]
 }
 
-export function canPlay(oldGame: Game, card: Card): boolean {
+export function canPlay(card: Card, oldGame: Game): boolean {
     const desiredRound = oldGame.currentRound
     if(desiredRound) {
         return round.canPlay(card, desiredRound)
@@ -81,7 +81,7 @@ export function drawCard(oldGame: Game): Game {
     return oldGame
 }
 
-export function sayUno(oldGame: Game, playerId: number): Game {
+export function sayUno(playerId: number, oldGame: Game): Game {
     const desiredRound = oldGame.currentRound
     if(desiredRound) {
         const newRound = round.sayUno(playerId, desiredRound) //not sure if fine bcs current player is number but sayUno requires playerName
@@ -90,7 +90,7 @@ export function sayUno(oldGame: Game, playerId: number): Game {
     return oldGame
 }
 
-export function accuseUno(oldGame: Game, accuser: number, accused: number): Game {
+export function accuseUno(accuser: number, accused: number, oldGame: Game): Game {
     const desiredRound = oldGame.currentRound
     if(desiredRound) {
         const newRound = round.catchUnoFailure(accuser, accused, desiredRound)// number vs PlayerNames
@@ -99,7 +99,7 @@ export function accuseUno(oldGame: Game, accuser: number, accused: number): Game
     return oldGame
 }
 
-export function changeWildCardColor(oldGame: Game, chosenColor: string): Game {
+export function changeWildCardColor( chosenColor: string, oldGame: Game): Game {
     const desiredRound = oldGame.currentRound
     if(desiredRound) {
         const newRound = round.setWildCard(chosenColor as Colors, desiredRound)
