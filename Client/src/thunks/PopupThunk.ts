@@ -7,13 +7,14 @@ import PlayCardThunk from '../thunks/PlayCardThunk'
 export const openPopup = (opts: {popup: string, card?: number}, dispatch: Dispatch) => {
   switch (opts.popup) {
     case "ChooseColor":
+      dispatch(popup_slice.actions.closePlay())
       dispatch(popup_slice.actions.openColorChange(opts.card!))
       return
     case "Play":
-      popup_slice.actions.openPlay()
+      dispatch(popup_slice.actions.openPlay())
       return
     case "Challenge":
-      popup_slice.actions.openChallenge()
+      dispatch(popup_slice.actions.openChallenge())
       return
   }
 }
@@ -29,6 +30,7 @@ export const challengeTrue = (gameId: number) =>
     const challenged = round!.players[challengedIdx];
 
     const handSnapshot = challenged.hand.map(c => ({ ...c }));
+    dispatch(popup_slice.actions.closeChallenge())
 
     dispatch(
       popup_slice.actions.openChallengeResultSnapshot({
@@ -57,20 +59,14 @@ export const challengeFalse = (gameId: number) =>
 export const playCard = async (
   gameId: number,
   index: number,
-  color: string | undefined,
   dispatch: Dispatch
 ) => {
-  const updatedGame =
-    color != undefined
-      ? await api.play(gameId, index, color)
-      : await api.play(gameId, index);
-  dispatch(active_games_slice.actions.upsert(updatedGame));
+  await dispatch(PlayCardThunk({gameId: gameId, cardId: index}))
 };
 
 
 export const drawCard = async (gameId: number, dispatch: Dispatch) => {
-  const updatedGame = await api.play(gameId, -1);
-  dispatch(active_games_slice.actions.upsert(updatedGame));
+  await dispatch(PlayCardThunk({gameId: gameId, cardId: -1}))
 };
 
 

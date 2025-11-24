@@ -2,8 +2,6 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { CardSpecs } from "../model/game";
 import { PlayerNames } from "domain/src/model/Player";
 
-export type Popups = "Play" | "ColorChange" | "Challenge" | "ChallengeResult";
-
 export interface ChallengeContext {
   challengedPlayer: PlayerNames;
   handBeforeDraw: CardSpecs[];

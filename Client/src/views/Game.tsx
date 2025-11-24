@@ -1,7 +1,7 @@
 import './Game.css'
 
 //React stuff
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 
@@ -25,7 +25,7 @@ import type { State, Dispatch as AppDispatch } from '../stores/store'
 //Domain Enums
 import { PlayerNames } from 'Domain/src/model/Player'
 import { Direction } from 'Domain/src/model/round'
-import { Colors, Type } from 'Domain/src/model/Card'
+import { Type } from 'Domain/src/model/Card'
 
 //Thunks
 import DrawCardThunk from '../thunks/DrawCardThunk'
@@ -63,13 +63,24 @@ const Game = () => {
 
   const isMyTurn = Boolean(round && myPlayer) && round?.currentPlayer === myPlayer?.playerName
 
+  const drawWithPopup = async () => {
+    dispatch(DrawCardThunk(game!.id))
+
+    const result = await dispatch(CanPlayThunk(game?.id!, myHand.length-1))
+    console.log(result)
+    if(result) {
+      PopupThunk.openPopup({popup: "Play"}, dispatch)
+    }
+    else {
+      dispatch(PlayCardThunk({gameId: game?.id!, cardId: -1}))
+    }
+  }
+
   const handleDraw = useCallback(() => {
     if (!game || !round || !myPlayer) {
-   
       return
     }
     if (!isMyTurn) {
-     
       return
     }
     dispatch(DrawCardThunk(game.id))
@@ -78,7 +89,6 @@ const Game = () => {
   const playWithPopup = ((gameId: number, cardId: number) => {
     const playedCard = myHand[cardId]
     if(playedCard.Type == Type.Wild || playedCard.Type == Type.WildDrawFour) {
-
       PopupThunk.openPopup({popup: "ChooseColor", card: cardId}, dispatch)
     }
     else {
@@ -108,6 +118,34 @@ const Game = () => {
     if (!game || !myPlayer) return
     dispatch(UnoCallThunk(game.id, myPlayer.playerName))
   }, [dispatch, game, myPlayer])
+
+  function usePrevious<T>(value: T): T | undefined {
+    const ref = useRef<T>(value);
+    useEffect(() => {
+      ref.current = value;
+    });
+    return ref.current;
+  }
+
+
+  const prevTopCard = usePrevious(round?.topCard);
+
+  useEffect(() => {
+    if (!prevTopCard && round?.topCard) {
+      return;
+    }
+
+    if (prevTopCard && round?.topCard) {
+      const justPlayed = prevTopCard.Type !== round.topCard.Type ||
+                        prevTopCard.Color !== round.topCard.Color ||
+                        prevTopCard.CardNumber !== round.topCard.CardNumber;
+
+      if (justPlayed && round.topCard.Type === Type.DummyDraw4 && round.currentPlayer === myPlayer?.playerName) {
+        PopupThunk.openPopup({ popup: "Challenge" }, dispatch);
+      }
+    }
+  }, [round?.topCard]);
+
 
   return (
     <div className='game-view'>
@@ -165,9 +203,9 @@ const Game = () => {
         />
       </aside>
 
-      <PlayPopup gameId={1} cardIndex={0} newCard={{ Type: Type.Numbered, Color: Colors.Red, CardNumber: 7 }} />
+      <PlayPopup gameId={game?.id!} cardIndex={-1} newCard={myHand[myHand.length-1]} />
       <ChooseColorPopup gameId={game?.id!} cardIndex={popup.cardToPlay}/>
-      <ChallengePopup gameId={1} />
+      <ChallengePopup gameId={game?.id!} />
       <ChallengeResultPopup />
     </div>
   )
