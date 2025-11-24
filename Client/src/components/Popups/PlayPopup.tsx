@@ -1,9 +1,10 @@
 import { useSelector, useDispatch } from "react-redux";
 import Popup from "./Popup";
 import type { State, Dispatch } from "../../stores/store";
-import { playCard, drawCard } from "../../thunks/PopupThunk";
+import { playCard, drawCard, openPopup } from "../../thunks/PopupThunk";
 import type { CardSpecs } from "../../model/game";
 import UnoCard from "../game/UnoCard";
+import { Type } from "Domain/src/model/Card";
 
 interface PlayPopupProps {
   gameId: number;
@@ -13,7 +14,7 @@ interface PlayPopupProps {
 
 const PlayPopup = ({ gameId, cardIndex, newCard }: PlayPopupProps) => {
   const dispatch = useDispatch<Dispatch>();
-  const { showPlay, colorSelected } = useSelector((state: State) => state.popups);
+  const { showPlay } = useSelector((state: State) => state.popups);
 
   return (
     <div>
@@ -24,9 +25,13 @@ const PlayPopup = ({ gameId, cardIndex, newCard }: PlayPopupProps) => {
             {
               label: "Play",
               onClick: async () => {
-                await playCard(gameId, cardIndex, colorSelected, dispatch); //what about dispatch here?
-              },
-            },
+                if(newCard.Type === Type.Wild || newCard.Type === Type.WildDrawFour){
+                  openPopup({popup: "ChooseColor"}, dispatch)
+                }
+                else {
+                  await playCard(gameId,cardIndex,dispatch)
+                }
+            }},
             {
               label: "Draw",
               onClick: async () => {
