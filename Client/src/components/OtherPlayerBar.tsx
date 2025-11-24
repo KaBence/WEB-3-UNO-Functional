@@ -4,18 +4,20 @@ import accuseUnoThunk from "../thunks/AccuseUNOThunk";
 import type { Dispatch } from "../stores/store";
 import type { PlayerSpecs } from "../model/game";
 import type { PlayerNames } from "domain/src/model/Player";
+import { useDispatch} from 'react-redux'
 
 export default function PlayersBar({
   players,
   gameId,
   currentPlayerId,
-  dispatch,
+
 }: {
   players: PlayerSpecs[];
   gameId: number;
   currentPlayerId: number;
-  dispatch: Dispatch;
+  
 }) {
+  const dispatch : Dispatch = useDispatch();
   const onAccuseUno = (accusedPlayerId: PlayerNames) => {
     accuseUnoThunk(gameId, currentPlayerId, accusedPlayerId, dispatch);
   };
