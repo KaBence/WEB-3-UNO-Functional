@@ -40,8 +40,16 @@ export type CardSpecs = Readonly<{
     CardNumber: CardNumber
 }>
 
-export type GamesFeed = Readonly<{
-    action: string,
-    Game: GameSpecs,
-    gameID: number
+export type GameListUpdate = Readonly<{
+    action: "ADDED" | "UPDATED" | "REMOVED"
+    game: GameSpecs | null
+    gameId: number
+}>
+
+export type ActiveGamesFeed = Readonly<{
+    activeGamesFeed: GameListUpdate
+}>
+
+export type PendingGamesFeed = Readonly<{
+    pendingGamesFeed: GameListUpdate
 }>
