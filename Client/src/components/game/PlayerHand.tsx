@@ -25,7 +25,7 @@ const PlayerHand = ({ cards, onPlay }: PlayerHandProps) => {
 
         return (
           <UnoCard
-            key={`${card.type}-${card.color ?? ''}-${card.number ?? ''}-${index}`}
+            key={`${card.Type}-${card.Color ?? ''}-${card.CardNumber ?? ''}-${index}`}
             card={card}
             className='hand-card'
             style={cardStyle}

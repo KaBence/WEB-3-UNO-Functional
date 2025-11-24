@@ -35,9 +35,9 @@ export type RoundSpecs = Readonly<{
 }>
 
 export type CardSpecs = Readonly<{
-    type: Type
-    color: Colors
-    number: CardNumber
+    Type: Type
+    Color: Colors
+    CardNumber: CardNumber
 }>
 
 export type GamesFeed = Readonly<{

@@ -13,9 +13,9 @@ type UnoCardProps = {
 
 const UnoCard = ({ card, className, style, onClick }: UnoCardProps) => {
   // Normalize server payload keys (Type/Color/CardNumber) to local expectations
-  const type = (card as any).type ?? (card as any).Type;
-  const color = (card as any).color ?? (card as any).Color;
-  const number = (card as any).number ?? (card as any).CardNumber;
+  const type = (card as CardSpecs).Type;
+  const color =  (card as CardSpecs).Color;
+  const number =  (card as CardSpecs).CardNumber;
 
   const isWild = useMemo(
     () => type === Type.Wild || type === Type.WildDrawFour,

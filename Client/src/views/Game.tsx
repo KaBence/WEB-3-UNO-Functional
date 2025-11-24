@@ -19,7 +19,7 @@ import UnoButton from '../components/game/UnoButton'
 import GameStatus from '../components/game/GameStatus'
 
 //Specs
-import type { CardSpecs, PlayerSpecs, RoundSpecs } from '../model/game'
+import type { CardSpecs} from '../model/game'
 import type { State, Dispatch as AppDispatch } from '../stores/store'
 
 //Domain Enums
@@ -50,17 +50,8 @@ const Game = () => {
 
   const myPlayer = useMemo(() => {
     if (!round || round.players.length === 0) return undefined
-    // Prefer matching by numeric player id; fall back to display name
-    const byId = player.playerName
-      ? round.players.find((p) => p.playerName === player.playerName)
-      : undefined
-    if (byId) return byId
-    if (player.player) {
-      const byName = round.players.find((p) => p.name === player.player)
-      if (byName) return byName
-    }
-    // Fallback to first player so UI remains interactive during setup/debug
-    return round.players[0]
+    if (!player.playerName) return undefined
+    return round.players.find((p) => p.playerName === player.playerName)
   }, [player, round])
 
   const myHand: CardSpecs[] = myPlayer?.hand ?? []
@@ -120,7 +111,7 @@ const Game = () => {
             players={round?.players ?? []}
             gameId={game?.id ?? 0}
             currentPlayerId={player.playerName ?? PlayerNames.player1}
-            dispatch={dispatch}
+        
           />
         </div>
         <section className='tabletop'>
@@ -165,7 +156,7 @@ const Game = () => {
         />
       </aside>
 
-      <PlayPopup gameId={1} cardIndex={0} newCard={{ type: Type.Numbered, color: Colors.Red, number: 7 }} />
+      <PlayPopup gameId={1} cardIndex={0} newCard={{ Type: Type.Numbered, Color: Colors.Red, CardNumber: 7 }} />
       <ChooseColorPopup gameId={1} cardIndex={1} />
       <ChallengePopup gameId={1} />
       <ChallengeResultPopup />
