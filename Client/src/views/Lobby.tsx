@@ -9,7 +9,7 @@ import { startRoundThunk } from "../thunks/StartRoundThunk";
 import { createGameThunk } from "../thunks/CreateGameThunk";
 import "./Lobby.css";
 
-const Lobby: React.FC = () => {
+const Lobby = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 

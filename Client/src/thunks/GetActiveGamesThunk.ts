@@ -7,7 +7,7 @@ export default async (dispatch: Dispatch) => {
   const gamesfeed  = await api.ActiveGamesRXJS()
   gamesfeed.subscribe(({ activeGamesFeed }) =>{
     if (!activeGamesFeed) return
-    const { action, game, gameId } = activeGamesFeed as any
+    const { action, game, gameId } = activeGamesFeed 
 
     switch (action) {
       case 'ADDED':

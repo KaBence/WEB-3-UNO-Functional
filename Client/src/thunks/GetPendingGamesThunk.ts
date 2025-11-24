@@ -7,7 +7,7 @@ export default async (dispatch: Dispatch) => {
   
   gamesfeed.subscribe(({ pendingGamesFeed }) => {
     if (!pendingGamesFeed) return
-    const { action, game, gameId } = pendingGamesFeed as any
+    const { action, game, gameId } = pendingGamesFeed 
 
     switch (action) {
       case 'ADDED':
