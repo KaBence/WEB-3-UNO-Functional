@@ -1,7 +1,7 @@
 import './Game.css'
 
 //React stuff
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams, useNavigate } from 'react-router-dom'
 
@@ -122,6 +122,16 @@ const Game = () => {
     }
     navigate('/lobby')
   }, [dispatch, game, navigate])
+
+  useEffect(() => {
+    if (!numericId) return
+    // If the game has been removed from active list, or this player is no longer in the round, return to lobby
+    if (activeGames.length > 0 && !game) {
+      navigate('/lobby')
+      return
+    }
+   
+  }, [activeGames.length, game, round, myPlayer, navigate, numericId])
 
   return (
     <div className='game-view'>
