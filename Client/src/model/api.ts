@@ -3,7 +3,7 @@ import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { subscriptionsRxJS } from "./rxjs";
-import type { GamesFeed } from "./game";
+import type { ActiveGamesFeed, PendingGamesFeed } from "./game";
 
 const wsLink = new GraphQLWsLink(createClient({
     url: 'ws://localhost:1337/graphql',
@@ -42,9 +42,9 @@ export async function ActiveGamesRXJS() {
             drawDeckSize
             players {
               hand {
-                color
-                number
-                type
+                Color
+                CardNumber
+                Type
               }
               name
               playerName
@@ -52,9 +52,9 @@ export async function ActiveGamesRXJS() {
             }
             statusMessage
             topCard {
-              color
-              number
-              type
+              Color
+              CardNumber
+              Type
             }
             winner
           }
@@ -72,7 +72,7 @@ export async function ActiveGamesRXJS() {
       }
     }
     `
-    return subscriptionsRxJS<GamesFeed>(apolloClient, subscriptionQuery)
+    return subscriptionsRxJS<ActiveGamesFeed>(apolloClient, subscriptionQuery)
 }
 
 export async function PendingGamesRXJS() {
@@ -87,9 +87,9 @@ export async function PendingGamesRXJS() {
             drawDeckSize
             players {
               hand {
-                color
-                number
-                type
+                Color
+                CardNumber
+                Type
               }
               name
               playerName
@@ -97,9 +97,9 @@ export async function PendingGamesRXJS() {
             }
             statusMessage
             topCard {
-              color
-              number
-              type
+              Color
+              CardNumber
+              Type
             }
             winner
           }
@@ -117,7 +117,7 @@ export async function PendingGamesRXJS() {
       }
     }    
     `
-    return subscriptionsRxJS<GamesFeed>(apolloClient, subscriptionQuery)
+    return subscriptionsRxJS<PendingGamesFeed>(apolloClient, subscriptionQuery)
 }
 
 export async function getPendingGames() {
@@ -130,9 +130,9 @@ export async function getPendingGames() {
               drawDeckSize
               players {
                 hand {
-                  color
-                  number
-                  type
+                  Color
+                  CardNumber
+                  Type
                 }
                 name
                 playerName
@@ -140,9 +140,9 @@ export async function getPendingGames() {
               }
               statusMessage
               topCard {
-                color
-                number
-                type
+                Color
+                CardNumber
+                Type
               }
               winner
             }
@@ -177,9 +177,9 @@ export async function getActiveGames() {
           drawDeckSize
           players {
             hand {
-              color
-              number
-              type
+              Color
+              CardNumber
+              Type
             }
             name
             playerName
@@ -187,9 +187,9 @@ export async function getActiveGames() {
           }
           statusMessage
           topCard {
-            color
-            number
-            type
+            Color
+            CardNumber
+            Type
           }
           winner
         }
@@ -233,18 +233,18 @@ export async function createGame() {
           drawDeckSize
           currentPlayer
           topCard {
-            type
-            number
-            color
+            Type
+            CardNumber
+            Color
           }
           players {
             unoCalled
             playerName
             name
             hand {
-              type
-              number
-              color
+              Type
+              CardNumber
+              Color
             }
           }
           currentDirection
@@ -280,18 +280,18 @@ export async function joinGame(gameId: number, playerName: string) {
           drawDeckSize
           currentPlayer
           topCard {
-            type
-            number
-            color
+            Type
+            CardNumber
+            Color
           }
           players {
             unoCalled
             playerName
             name
             hand {
-              type
-              number
-              color
+              Type
+              CardNumber
+              Color
             }
           }
           currentDirection
@@ -327,18 +327,18 @@ export async function removePlayer(gameId: number, playerId: number) {
           drawDeckSize
           currentPlayer
           topCard {
-            type
-            number
-            color
+            Type
+            CardNumber
+            Color
           }
           players {
             unoCalled
             playerName
             name
             hand {
-              type
-              number
-              color
+              Type
+              CardNumber
+              Color
             }
           }
           currentDirection
@@ -375,18 +375,18 @@ export async function startRound(gameId: number) {
           drawDeckSize
           currentPlayer
           topCard {
-            type
-            number
-            color
+            Type
+            CardNumber
+            Color
           }
           players {
             unoCalled
             playerName
             name
             hand {
-              type
-              number
-              color
+              Type
+              CardNumber
+              Color
             }
           }
           currentDirection
@@ -423,18 +423,18 @@ export async function changeWildCardColor(gameId: number, chosenColor: string) {
           drawDeckSize
           currentPlayer
           topCard {
-            type
-            number
-            color
+            Type
+            CardNumber
+            Color
           }
           players {
             unoCalled
             playerName
             name
             hand {
-              type
-              number
-              color
+              Type
+              CardNumber
+              Color
             }
           }
           currentDirection
@@ -470,18 +470,18 @@ export async function drawCard(gameId: number) {
           drawDeckSize
           currentPlayer
           topCard {
-            type
-            number
-            color
+            Type
+            CardNumber
+            Color
           }
           players {
             unoCalled
             playerName
             name
             hand {
-              type
-              number
-              color
+              Type
+              CardNumber
+              Color
             }
           }
           currentDirection
@@ -517,18 +517,18 @@ export async function play(gameId: number, cardId: number, chosenColor?: string)
           drawDeckSize
           currentPlayer
           topCard {
-            type
-            number
-            color
+            Type
+            CardNumber
+            Color
           }
           players {
             unoCalled
             playerName
             name
             hand {
-              type
-              number
-              color
+              Type
+              CardNumber
+              Color
             }
           }
           currentDirection
@@ -580,18 +580,18 @@ export async function sayUno(gameId: number, playerId: number) {
           drawDeckSize
           currentPlayer
           topCard {
-            type
-            number
-            color
+            Type
+            CardNumber
+            Color
           }
           players {
             unoCalled
             playerName
             name
             hand {
-              type
-              number
-              color
+              Type
+              CardNumber
+              Color
             }
           }
           currentDirection
@@ -627,18 +627,18 @@ export async function accuseUno(gameId: number, accuser: number, accused: number
           drawDeckSize
           currentPlayer
           topCard {
-            type
-            number
-            color
+            Type
+            CardNumber
+            Color
           }
           players {
             unoCalled
             playerName
             name
             hand {
-              type
-              number
-              color
+              Type
+              CardNumber
+              Color
             }
           }
           currentDirection

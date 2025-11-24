@@ -19,6 +19,7 @@ const Login = () => {
       return;
     }
     dispatch(player_slice.actions.login(trimmed));
+    localStorage.setItem('uno.playerName', trimmed);
     navigate('/lobby');
   }, [dispatch, name, navigate]);
 
@@ -29,11 +30,7 @@ const Login = () => {
   return (
     <div className="login-root">
       <div className="login-card" role="main">
-        <img
-          src="/assets/uno-logo.png"
-          alt="UNO logo"
-          className="login-logo"
-        />
+      
 
         <h2 className="login-title">Let's play UNO!</h2>
         <p className="login-subtitle">Pick a name and jump into the lobby.</p>
@@ -64,7 +61,7 @@ const Login = () => {
             Create Player
           </button>
 
-          <p className="helper">You can change your name later from the lobby.</p>
+        
         </div>
       </div>
     </div>

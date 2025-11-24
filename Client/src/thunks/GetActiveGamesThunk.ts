@@ -5,15 +5,20 @@ import type { Dispatch } from '../stores/store'
 
 export default async (dispatch: Dispatch) => {
   const gamesfeed  = await api.ActiveGamesRXJS()
-  gamesfeed.subscribe(({action,Game,gameID}) =>{
+  gamesfeed.subscribe(({ activeGamesFeed }) =>{
+    if (!activeGamesFeed) return
+    const { action, game, gameId } = activeGamesFeed as any
+
     switch (action) {
-        case 'ADDED':
-        case 'UPDATED':
-          dispatch(active_games_slice.actions.upsert(Game))
-          break;
-        case 'REMOVED':
-          dispatch(pending_games_slice.actions.remove({id:gameID}))
-          break;
-      }
+      case 'ADDED':
+      case 'UPDATED':
+        if (game) dispatch(active_games_slice.actions.upsert(game))
+        break;
+      case 'REMOVED':
+        if (gameId !== undefined) {
+          dispatch(active_games_slice.actions.remove({id:gameId}))
+        }
+        break;
+    }
   })
 }

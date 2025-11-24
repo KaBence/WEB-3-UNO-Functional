@@ -6,7 +6,10 @@ export const createGameThunk = () => async (dispatch: Dispatch) => {
   try {
     const newGame = await api.createGame()
     dispatch(pending_games_slice.actions.upsert(newGame))
+    // should we change this ?
+    return newGame
   } catch (error) {
     console.error("Failed to create game:", error)
+    throw error
   }
 }

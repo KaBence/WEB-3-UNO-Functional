@@ -5,7 +5,11 @@ export type PlayerState = {
   playerName?: number
 }
 
-const init_state: PlayerState = { player: undefined, playerName: undefined }
+const storedPlayer = typeof window !== 'undefined'
+  ? localStorage.getItem('uno.playerName') ?? undefined
+  : undefined
+
+const init_state: PlayerState = { player: storedPlayer, playerName: undefined }
 // When calling player_slice.actions.login(player) -> player value becomes the payload
 // initial state is not needed because I am overwriting the whole state and saving is handled by redux
 const player_reducers = {

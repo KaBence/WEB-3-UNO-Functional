@@ -3,38 +3,56 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import type { State, Dispatch as AppDispatch } from "../stores/store";
 import type { GameSpecs } from "../model/game";
-import { pending_games_slice } from "../slices/pending_games_slice";
-import * as api from "../model/api";
 import { addPlayerThunk } from "../thunks/AddPlayerThunk";
 import { removePlayerThunk } from "../thunks/RemovePlayerThunk";
 import { startRoundThunk } from "../thunks/StartRoundThunk";
+import { createGameThunk } from "../thunks/CreateGameThunk";
 import "./Lobby.css";
 
 const Lobby: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  // ==== SELECTORS / STORE (adjust keys to match your redux slices) ====
-  // Player name & playerGameId (which game the player is "in")
+
   const playerName = useSelector((s: State) => s.player.player) ?? "Player";
 
-  // Pending games (list of lobby games)
+
   const pendingGames = useSelector((s: State) => s.pending_games ?? []) as GameSpecs[];
 
-  // Active / ongoing games (used to navigate if a game becomes active)
   const activeGames = useSelector((s: State) => s.active_games ?? []) as GameSpecs[];
 
-  // ==== LOCAL UI STATE ====
   const [joinedGameId, setJoinedGameId] = useState<number | undefined>(undefined);
   const [hasCreatedGame, setHasCreatedGame] = useState<boolean>(false);
 
-  // first letter avatar
+  
   const nameFirstLetter = playerName?.[0] ?? "P";
 
-  // visibleGames corresponds to Vue's computed visibleGames = pendingGamesStore.games
-  const visibleGames = pendingGames ?? [];
+  const visibleGames = useMemo(
+    () => (pendingGames ?? []).filter((g) => !g.currentRound),
+    [pendingGames]
+  );
 
-  // helper to get a game by id from pendingGames, or undefined
+  const myPendingGame = useMemo(
+    () => visibleGames.find((g) => g.players?.some((p) => p.name === playerName)),
+    [visibleGames, playerName]
+  );
+
+  const myActiveGame = useMemo(
+    () => activeGames.find((g) => g.players?.some((p) => p.name === playerName)),
+    [activeGames, playerName]
+  );
+
+  useEffect(() => {
+    if (myPendingGame) {
+      setJoinedGameId(myPendingGame.id);
+    } else if (myActiveGame) {
+      setJoinedGameId(myActiveGame.id);
+    } else {
+      setJoinedGameId(undefined);
+    }
+  }, [myPendingGame, myActiveGame]);
+
+
   const getPendingGame = useCallback(
     (id?: number) => visibleGames.find((g) => g.id === id),
     [visibleGames]
@@ -48,10 +66,9 @@ const Lobby: React.FC = () => {
     [getPendingGame]
   );
 
-  // ===== Handlers =====
   const joinGame = useCallback(
     async (gameId: number) => {
-      // local guards
+     
       if (joinedGameId === gameId) {
         setJoinedGameId(undefined);
         return;
@@ -67,7 +84,7 @@ const Lobby: React.FC = () => {
         return;
       }
 
-      // capacity guard
+     
       if (getPlayerCount(gameId) >= 10) {
         window.alert("This game is full (10 players).");
         return;
@@ -119,8 +136,8 @@ const Lobby: React.FC = () => {
     }
 
     try {
-      const newGame = await api.createGame();
-      dispatch(pending_games_slice.actions.upsert(newGame));
+      const newGame = await dispatch(createGameThunk());
+      if (!newGame) return;
       const gameId = newGame.id;
       await joinGame(gameId);
       setHasCreatedGame(true);
@@ -141,6 +158,7 @@ const Lobby: React.FC = () => {
         return;
       }
       try {
+        //TODO  here it crashes
         await dispatch(startRoundThunk(gameId));
         navigate(`/game/${gameId}`);
         console.log("Starting game", gameId);
@@ -154,15 +172,10 @@ const Lobby: React.FC = () => {
 
   // === Effect: watch pending game for player's game id; if game becomes active navigate to /Game?id=...
   useEffect(() => {
-    if (joinedGameId === undefined) return;
-    const active = activeGames.find((g) => g.id === joinedGameId);
-    if (active) {
-      navigate(`/game/${joinedGameId}`);
+    if (myActiveGame) {
+      navigate(`/game/${myActiveGame.id}`);
     }
-  }, [activeGames, joinedGameId, navigate]);
-
-  // visibleGames memo (optional)
-  const gamesList = useMemo(() => visibleGames, [visibleGames]);
+  }, [myActiveGame, navigate]);
 
   return (
     <div className="lobby-wrapper">
@@ -188,7 +201,7 @@ const Lobby: React.FC = () => {
               <span className="games-subtitle">Join or create a lobby to start playing.</span>
             </div>
             <ul className="lobby-game-list">
-              {gamesList.map((g) => (
+              {visibleGames.map((g) => (
                 <li className="lobby-game-item" key={g.id}>
                   <div className="meta">
                     <div className="title">Game {g.id}</div>
