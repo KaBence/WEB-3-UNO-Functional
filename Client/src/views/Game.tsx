@@ -126,7 +126,7 @@ const Game = () => {
   useEffect(() => {
     if (!numericId) return
     // If the game has been removed from active list, or this player is no longer in the round, return to lobby
-    if (activeGames.length > 0 && !game) {
+    if (!game) {
       navigate('/lobby')
       return
     }
