@@ -21,7 +21,7 @@ type DrawDeck = BaseDeck & {
 // Functions
 
 export function addCard(card: Card, deck: Deck): Deck {
-    let newCards = _.concat(deck.cards, card)
+    const newCards = _.concat(deck.cards, card)
     return { ...deck, cards: newCards }
 }
 

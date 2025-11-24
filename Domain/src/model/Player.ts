@@ -38,12 +38,12 @@ export function addCardToPlayerHand(card: Card, player: Player): Player {
     }
 }
 
-export function removeCardFromHand(card: Card, player: Player): [Card, Player] {
-    const indexCard = player.hand.indexOf(card);
-    const newHand: Cards = {
-        ...player.hand.slice(0, indexCard),
-        ...player.hand.slice(indexCard + 1)
-    };
+export function removeCardFromHand(cardId: number, player: Player): [Card, Player] {
+    const card = player.hand[cardId];
+    const newHand: Cards = [
+        ...player.hand.slice(0, cardId),
+        ...player.hand.slice(cardId + 1)
+    ];
 
     const updatedPlayer: Player = {
         ...player,

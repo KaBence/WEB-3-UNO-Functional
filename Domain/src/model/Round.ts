@@ -21,7 +21,6 @@ export type Round = {
   readonly currentPlayer: number;
   readonly drawPile: Deck;
   readonly discardPile: Deck;
-  readonly topCard: Card;
   readonly statusMessage: string;
   readonly winner?: Player;
 };
@@ -49,14 +48,12 @@ export function initializeRound(players: Player[], dealer: number): Round {
   const [firstDiscard, nextDrawPile] = deck.deal(remainingDeck);
   const discardPile = deckFactory.createDiscardDeck(firstDiscard);
   
-  const [topcard,discardDeck] = deck.peek(discardPile)
   const initialState: Round = {
     players: playersWithCards,
     currentDirection: Direction.Clockwise,
     currentPlayer: ((dealer + 1) % players.length) + 1,
     drawPile: nextDrawPile,
     discardPile: discardPile,
-    topCard: topcard!,
     statusMessage: "A new round has begun!",
     winner: undefined,
   };
@@ -66,6 +63,11 @@ export function initializeRound(players: Player[], dealer: number): Round {
 
 export function getSpecificPlayer(player: player.PlayerNames, oldRound: Round): Player {
   return oldRound.players.find((p) => p.playerName === player)!
+}
+
+// Previously topcard was saved, but then we have to update topcard and the discardPile variable, getting it from the discardPile solves it. (Single Source of truth)
+export function getTopCard(round:Round):Card{
+  return deck.peek(round.discardPile)[0]!
 }
 
 export function getRoundWinner(oldRound: Round): Round {
@@ -114,7 +116,7 @@ export function catchUnoFailure(accuser: player.PlayerNames, accused: player.Pla
 }
 
 export function canPlay(cardId: number, oldRound: Round): boolean {
-  const topCard = oldRound.topCard
+  const topCard = getTopCard(oldRound)
   const playedCard = getSpecificPlayer(oldRound.currentPlayer, oldRound ).hand[cardId]
   switch (playedCard.Type) {
     case card.Type.Reverse:
@@ -145,7 +147,7 @@ export function canPlay(cardId: number, oldRound: Round): boolean {
         case card.Type.DummyDraw4:
           return topCard.Color === playedCard.Color
         case card.Type.Numbered:
-          return topCard.CardNumber === playedCard.CardNumber || topCard.Color === topCard.Color
+          return topCard.CardNumber === playedCard.CardNumber || topCard.Color === playedCard.Color
         case card.Type.Wild:
         case card.Type.WildDrawFour:
       }
@@ -208,7 +210,7 @@ function getPreviousPlayer(oldRound: Round): player.PlayerNames {
   function couldPlayInsteadofDrawFour(oldRound: Round): boolean {
     const hand = getSpecificPlayer(getPreviousPlayer(oldRound),oldRound).hand
 
-    const topCard = oldRound.topCard;
+    const topCard = getTopCard(oldRound)
     for (let i = 0; i < hand.length; i++) {
       const cardToCheck = hand[i];
       switch (cardToCheck.Type) {
@@ -279,7 +281,7 @@ export function challengeWildDrawFour(isChallenged: boolean, oldRound: Round): [
 }
 
 export function handleStartRound(oldRound: Round): Round { //we can ad Bence's helper functions from play
-  const currentCard = oldRound.topCard
+  const currentCard = getTopCard(oldRound)
 
   switch (currentCard.Type) {
     case card.Type.Skip:
@@ -337,13 +339,17 @@ export function playerAction(card: Card, playerId: player.PlayerNames, oldRound:
 }
 
 export function playIfAllowed(opts: { cardId: number, color?: card.Colors }, round: Round) {
-  const playedCard = getSpecificPlayer(round.currentPlayer, round ).hand[opts.cardId] // has to remove the card
-  if (playedCard == undefined) { // has to change
+  const currentPlayer = getSpecificPlayer(round.currentPlayer, round)
+  const [takenCard, newCurrentPlayer] = player.removeCardFromHand(opts.cardId, currentPlayer)
+
+  if (takenCard == undefined) { // has to change
     console.log("I tried to take a card that doesn't exist, whoops")
     return round
   }
-  const color = opts.color
-  return canPlay(opts.cardId, round) ? play({ playedCard, color }, round) : round
+
+  const newPlayersArray = round.players.map(p => p.playerName === round.currentPlayer ? newCurrentPlayer : p)
+  const updatedRound = { ...round, players: newPlayersArray }
+  return canPlay(opts.cardId, round) ? play({ playedCard: takenCard, color: opts.color }, updatedRound) : round
 }
 
 export function play(opts: { playedCard: Card, color?: card.Colors }, round: Round): Round {

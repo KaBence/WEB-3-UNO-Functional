@@ -1,17 +1,18 @@
 import { PubSub } from "graphql-subscriptions";
 import { GameAPI } from "./api";
 import { Game } from "Domain/src/model/Game";
-import { Round } from "domain/src/model/Round"
+import * as Round from "domain/src/model/Round"
+
+type Round = Round.Round
 
 export function toGraphQLRound(round?:Round){
   if(!round) return undefined
-  console.log(round.topCard.Type)
   return {
     players: round.players,
     currentDirection: round.currentDirection,
     currentPlayer: round.currentPlayer,
     drawDeckSize: round.drawPile.cards.length,
-    topCard: round.topCard,
+    topCard: Round.getTopCard(round),
     statusMessage: round.statusMessage,
     winner: round.winner
   }
