@@ -32,6 +32,7 @@ import DrawCardThunk from '../thunks/DrawCardThunk'
 import PlayCardThunk from '../thunks/PlayCardThunk'
 import CanPlayThunk from '../thunks/CanPlayThunk'
 import UnoCallThunk from '../thunks/UnoCallThunk'
+import { startRoundThunk } from '../thunks/StartRoundThunk'
 
 const Game = () => {
   const { id } = useParams<{ id?: string }>()
@@ -100,11 +101,27 @@ const Game = () => {
     dispatch(UnoCallThunk(game.id, myPlayer.playerName))
   }, [dispatch, game, myPlayer])
 
+  const handleTimeUp = useCallback(() => {
+    if (!game || !round || !myPlayer) return
+    if (!isMyTurn) return
+    dispatch(DrawCardThunk(game.id))
+  }, [dispatch, game, round, myPlayer, isMyTurn])
+
+  const handleStartNewRound = useCallback(() => {
+    if (!game || !round?.winner) return
+    dispatch(startRoundThunk(game.id))
+  }, [dispatch, game, round])
+
   return (
     <div className='game-view'>
       <div className='game-board-area'>
         <div className='status-bar'>
-          <StatusBar message={statusMessage} isYourTurn={true} arrowAngle={180} score={120} />
+          <StatusBar
+            message={statusMessage}
+            isYourTurn={isMyTurn}
+            arrowAngle={180}
+            score={120}
+          />
         </div>
         <div className='player-bar'>
           <PlayersBar
@@ -153,6 +170,9 @@ const Game = () => {
         <GameStatus
           game={game}
           myPlayerId={player.playerName ?? PlayerNames.player1}
+          isMyTurn={isMyTurn}
+          onTimeUp={handleTimeUp}
+          onPlayAgain={handleStartNewRound}
         />
       </aside>
 

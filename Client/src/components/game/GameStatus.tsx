@@ -6,6 +6,7 @@ import './GameStatus.css'
 type GameStatusProps = {
   game?: GameSpecs
   myPlayerId: PlayerNames
+  isMyTurn?: boolean
   onPlayAgain?: () => void
   onEndGame?: () => void
   onTimeUp?: () => void
@@ -17,6 +18,7 @@ const CRITICAL_THRESHOLD = 8
 const GameStatus = ({
   game,
   myPlayerId,
+  isMyTurn: isMyTurnProp,
   onPlayAgain,
   onEndGame,
   onTimeUp
@@ -35,11 +37,13 @@ const GameStatus = ({
   const gameWinnerId = game?.winner ?? null
   const showPlayAgainAfterGame = Boolean(gameWinnerId)
   const currentPlayerId = round?.currentPlayer
-  const isMyTurn = currentPlayerId === myPlayerId && roundGoing
+  const isMyTurn = typeof isMyTurnProp === 'boolean'
+    ? isMyTurnProp && roundGoing
+    : currentPlayerId === myPlayerId && roundGoing
 
   useEffect(() => {
-    isMyTurnRef.current = Boolean(currentPlayerId === myPlayerId)
-  }, [currentPlayerId, myPlayerId])
+    isMyTurnRef.current = isMyTurn
+  }, [isMyTurn])
 
   useEffect(() => {
     roundGoingRef.current = roundGoing
