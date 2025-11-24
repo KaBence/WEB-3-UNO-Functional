@@ -32,13 +32,14 @@
 
 .player-bar {
   width: 100%;
-  background: linear-gradient(135deg, #111827, #0b1220);
-  color: #f8fbff;
-  padding: 1rem 1.5rem;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 1.1rem 1.4rem;
   border-radius: 14px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+  border: 1px solid #e5e7eb;
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 0.75rem;
   font-weight: 600;
 }

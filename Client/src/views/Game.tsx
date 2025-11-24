@@ -143,7 +143,8 @@ const Game = () => {
           <PlayersBar
             players={round?.players ?? []}
             gameId={game?.id ?? 0}
-            currentPlayerId={player.playerName ?? PlayerNames.player1}
+            myPlayerId={player.playerName ?? undefined}
+            currentTurnId={round?.currentPlayer ?? undefined}
         
           />
         </div>

@@ -9,48 +9,79 @@ import { useDispatch} from 'react-redux'
 export default function PlayersBar({
   players,
   gameId,
-  currentPlayerId,
+  myPlayerId,
+  currentTurnId,
 
 }: {
   players: PlayerSpecs[];
   gameId: number;
-  currentPlayerId: number;
+  myPlayerId?: number;
+  currentTurnId?: number;
   
 }) {
   const dispatch : Dispatch = useDispatch();
   const onAccuseUno = (accusedPlayerId: PlayerNames) => {
-    accuseUnoThunk(gameId, currentPlayerId, accusedPlayerId, dispatch);
+    if (myPlayerId === undefined) return
+    accuseUnoThunk(gameId, myPlayerId, accusedPlayerId, dispatch);
   };
+
+  const visiblePlayers = players.filter(
+    (p) => myPlayerId === undefined || p.playerName !== myPlayerId
+  )
 
   return (
     <div className="players-bar">
-      {players.map((player) => (
-        <div key={player.playerName} className="player-column">
-          <div className="player-name">{player.name}</div>
+      {visiblePlayers.map((player) => {
+        const isCurrent = currentTurnId !== undefined && player.playerName === currentTurnId;
+        const len = player.hand.length;
+        const cardWidth = 68;
+        const spacing = 14;
+        const stackWidth = Math.max(
+          cardWidth + 30,
+          Math.min(360, cardWidth + (len - 1) * spacing + 40)
+        );
+        const centerOffset = stackWidth / 2 - cardWidth / 2;
 
-          <div className="player-hand">
-            {player.hand.map((_, index) => {
-              const len = player.hand.length;
-              return (
-                <div
-                  key={index}
-                  className="card back"
-                  style={{
-                    transform: `rotate(${index * 5 - len * 2.5}deg)
-                                translateX(${index * 12 - (len * 12) / 2}px)`,
-                  }}
-                />
-              );
-            })}
-          </div>
+        return (
+          <div
+            key={player.playerName}
+            className={`player-card ${isCurrent ? "active" : ""}`}
+          >
+            <div className="player-header">
+              <span className="avatar">{player.name[0] ?? "?"}</span>
+              <div className="player-meta">
+                <div className="player-name">{player.name}</div>
+                {isCurrent && <span className="turn-pill">Playing</span>}
+              </div>
+            </div>
 
-          <div className="call-uno">
-            <button onClick={() => onAccuseUno(player.playerName)}>
-              UNO Accuse!
-            </button>
+            <div className="hand-row">
+              <div className="card-stack" style={{ width: `${stackWidth}px` }}>
+                {player.hand.map((_, index) => {
+                  const left = centerOffset + (index - (len - 1) / 2) * spacing;
+                  return (
+                    <div
+                      key={index}
+                      className="card back"
+                      style={{
+                        transform: `rotate(${index * 3 - len * 1.5}deg)`,
+                        left: `${left}px`,
+                      }}
+                    />
+                  );
+                })}
+              </div>
+              <div className="count-pill">{player.hand.length} cards</div>
+            </div>
+
+            <div className="call-uno">
+              <button onClick={() => onAccuseUno(player.playerName)}>
+                Accuse UNO
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
