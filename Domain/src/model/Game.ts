@@ -3,11 +3,9 @@ import type { Round } from "./Round";
 import * as RoundFactory from "./RoundFactory";
 import * as deck from "./Deck"
 import * as DeckFactory from "./DeckFactory";
-import * as player from "./Player"
 import type { PlayerNames, PlayerRef } from "./Player";
 import * as playerFactory from "./PlayerFactory"
-import { Card, Type } from "./Card";
-import { Deck, deal, shuffle, DeckTypes } from "./Deck";
+import { Type } from "./Card";
 import { getRoundWinner as roundHasWinner, } from "./Round";
 
 

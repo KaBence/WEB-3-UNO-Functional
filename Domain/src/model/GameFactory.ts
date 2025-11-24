@@ -1,5 +1,6 @@
 // gameFactory.ts — constructors & policies
 import type { Game } from "./Game";
+import { PlayerNames } from "./Player";
 
 export function newGame(id: number, targetScore = 500): Game {
   return {
@@ -7,7 +8,9 @@ export function newGame(id: number, targetScore = 500): Game {
     players: [],
     currentRound: undefined,
     targetScore,
-    scores: {},
+    scores: Object.fromEntries(
+      Array.from({ length: 10 }, (_, i) => [i + 1 as PlayerNames, 0])
+    ) as Record<PlayerNames, number>,
     dealer: -1,
     roundHistory: [],
     winner: undefined,
