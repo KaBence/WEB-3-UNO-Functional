@@ -27,17 +27,19 @@ import { PlayerNames } from 'Domain/src/model/Player'
 import { Direction } from 'Domain/src/model/round'
 import { Colors, Type } from 'Domain/src/model/Card'
 
-//Store and thunks should we have thunks here?
+//Thunks
 import DrawCardThunk from '../thunks/DrawCardThunk'
 import PlayCardThunk from '../thunks/PlayCardThunk'
 import CanPlayThunk from '../thunks/CanPlayThunk'
 import UnoCallThunk from '../thunks/UnoCallThunk'
+import * as PopupThunk from "../thunks/PopupThunk"
 
 const Game = () => {
   const { id } = useParams<{ id?: string }>()
   const dispatch: AppDispatch = useDispatch()
   const activeGames = useSelector((state: State) => state.active_games)
   const player = useSelector((state: State) => state.player)
+  const popup = useSelector((state: State) => state.popups)
 
   const numericId = id ? Number(id) : undefined
   const game = useMemo(() => {
@@ -73,6 +75,17 @@ const Game = () => {
     dispatch(DrawCardThunk(game.id))
   }, [dispatch, game, round, myPlayer, isMyTurn])
 
+  const playWithPopup = ((gameId: number, cardId: number) => {
+    const playedCard = myHand[cardId]
+    if(playedCard.Type == Type.Wild || playedCard.Type == Type.WildDrawFour) {
+
+      PopupThunk.openPopup({popup: "ChooseColor", card: cardId}, dispatch)
+    }
+    else {
+        dispatch(PlayCardThunk({ gameId, cardId}))
+    }
+  })
+
   const handlePlay = useCallback(
     async (cardIndex: number) => {
       if (!game || !round || !myPlayer) {
@@ -83,11 +96,7 @@ const Game = () => {
       }
 
       try {
-        const playable = await dispatch(CanPlayThunk(game.id, cardIndex))
-        if (!playable) {
-          throw new Error('Card is not playable')
-        }
-        dispatch(PlayCardThunk({ gameId: game.id, cardId: cardIndex }))
+        playWithPopup(game.id,cardIndex)
       } catch (error) {
         console.error('Unable to play card', error)
       }
@@ -157,7 +166,7 @@ const Game = () => {
       </aside>
 
       <PlayPopup gameId={1} cardIndex={0} newCard={{ Type: Type.Numbered, Color: Colors.Red, CardNumber: 7 }} />
-      <ChooseColorPopup gameId={1} cardIndex={1} />
+      <ChooseColorPopup gameId={game?.id!} cardIndex={popup.cardToPlay}/>
       <ChallengePopup gameId={1} />
       <ChallengeResultPopup />
     </div>

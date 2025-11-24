@@ -2,6 +2,21 @@ import * as api from "../model/api";
 import { active_games_slice } from "../slices/active_games_slice";
 import { popup_slice } from "../slices/popup_slice";
 import type { Dispatch, GetState } from "../stores/store";
+import PlayCardThunk from '../thunks/PlayCardThunk'
+
+export const openPopup = (opts: {popup: string, card?: number}, dispatch: Dispatch) => {
+  switch (opts.popup) {
+    case "ChooseColor":
+      dispatch(popup_slice.actions.openColorChange(opts.card!))
+      return
+    case "Play":
+      popup_slice.actions.openPlay()
+      return
+    case "Challenge":
+      popup_slice.actions.openChallenge()
+      return
+  }
+}
 
 export const challengeTrue = (gameId: number) => 
   async (dispatch: Dispatch, getState: GetState) => {
@@ -49,7 +64,6 @@ export const playCard = async (
     color != undefined
       ? await api.play(gameId, index, color)
       : await api.play(gameId, index);
-
   dispatch(active_games_slice.actions.upsert(updatedGame));
 };
 
@@ -62,14 +76,12 @@ export const drawCard = async (gameId: number, dispatch: Dispatch) => {
 
 export const chooseColor = async (
   gameId: number,
-  cardIndex: number,
+  cardId: number,
   color: string,
-  dispatch: Dispatch
+  dispatch: Dispatch,
 ) => {
   dispatch(popup_slice.actions.setColorSelected(color));
-
-  const updatedGame = await api.play(gameId, cardIndex, color);
-
+  await dispatch(PlayCardThunk({gameId: gameId, cardId: cardId, chosenColor: color}))
   dispatch(popup_slice.actions.closeColorChange());
-  dispatch(active_games_slice.actions.upsert(updatedGame));
 };
+
