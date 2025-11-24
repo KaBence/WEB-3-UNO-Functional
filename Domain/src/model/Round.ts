@@ -22,7 +22,7 @@ export type Round = {
   readonly drawPile: Deck;
   readonly discardPile: Deck;
   readonly statusMessage: string;
-  readonly winner?: Player;
+  readonly winner?: player.PlayerNames;
 };
 
 export function initializeRound(players: Player[], dealer: number): Round {
@@ -74,7 +74,7 @@ export function getRoundWinner(oldRound: Round): Round {
   if(oldRound.players.some((p) => p.hand.length === 0)){
     const winner = oldRound.players.find((p) => p.hand.length === 0)!
     const statusMessage = winner.name + " Won the round!"
-    return { ...oldRound, winner: winner, statusMessage: statusMessage }
+    return { ...oldRound, winner: winner.playerName, statusMessage: statusMessage }
   }
   return oldRound
 }

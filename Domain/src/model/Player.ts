@@ -1,9 +1,8 @@
 import * as _ from 'lodash';
 import type { Card, Cards } from './Card';
 
-export type PlayerId = number;
 export type PlayerRef = { 
-    readonly playerName: PlayerId; 
+    readonly playerName: PlayerNames; 
     readonly name: string; 
 };
 
