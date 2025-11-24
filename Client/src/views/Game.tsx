@@ -3,7 +3,7 @@ import './Game.css'
 //React stuff
 import { useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 
 //Components
 import StatusBar from "../components/Statusbar"
@@ -33,10 +33,12 @@ import PlayCardThunk from '../thunks/PlayCardThunk'
 import CanPlayThunk from '../thunks/CanPlayThunk'
 import UnoCallThunk from '../thunks/UnoCallThunk'
 import { startRoundThunk } from '../thunks/StartRoundThunk'
+import { removePlayerThunk } from '../thunks/RemovePlayerThunk'
 
 const Game = () => {
   const { id } = useParams<{ id?: string }>()
   const dispatch: AppDispatch = useDispatch()
+  const navigate = useNavigate()
   const activeGames = useSelector((state: State) => state.active_games)
   const player = useSelector((state: State) => state.player)
 
@@ -112,6 +114,15 @@ const Game = () => {
     dispatch(startRoundThunk(game.id))
   }, [dispatch, game, round])
 
+  const handleEndGame = useCallback(async () => {
+    if (!game) return
+    const players = game.players ?? []
+    for (const p of players) {
+      await dispatch(removePlayerThunk(game.id, Number(p.playerName)))
+    }
+    navigate('/lobby')
+  }, [dispatch, game, navigate])
+
   return (
     <div className='game-view'>
       <div className='game-board-area'>
@@ -168,6 +179,7 @@ const Game = () => {
           isMyTurn={isMyTurn}
           onTimeUp={handleTimeUp}
           onPlayAgain={handleStartNewRound}
+          onEndGame={handleEndGame}
         />
       </aside>
 
