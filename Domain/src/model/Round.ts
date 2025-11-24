@@ -53,7 +53,7 @@ export function initializeRound(players: Player[], dealer: number): Round {
   const initialState: Round = {
     players: playersWithCards,
     currentDirection: Direction.Clockwise,
-    currentPlayer: (dealer + 1) % players.length,
+    currentPlayer: ((dealer + 1) % players.length) + 1,
     drawPile: nextDrawPile,
     discardPile: discardPile,
     topCard: topcard!,
@@ -67,10 +67,6 @@ export function initializeRound(players: Player[], dealer: number): Round {
 export function getSpecificPlayer(player: player.PlayerNames, oldRound: Round): Player {
   return oldRound.players.find((p) => p.playerName === player)!
 }
-
-
-
-
 
 export function getRoundWinner(oldRound: Round): Round {
   if(oldRound.players.some((p) => p.hand.length === 0)){
@@ -92,8 +88,8 @@ export function draw(noCards: number, playerId: player.PlayerNames, oldRound: Ro
   }
 
   for (let i = 0; i < noCards; i++) {
-    const dealFlow = _.flow([deal, playerAction]) // just pass all of the small helper functions and _ is dealing with it
-    currentRoundState = dealFlow(playerId, currentRoundState)
+    const [dealtCard, _, roundAfterDeal] = deal(playerId, currentRoundState)
+    currentRoundState = playerAction(dealtCard, playerId, roundAfterDeal)
   }
 
   const finalState = {...currentRoundState, statusMessage: `${playerInfo.name} drew ${noCards} card(s).`}
@@ -319,15 +315,15 @@ export function setWildCard(color: card.Colors, oldRound: Round): Round {
 
 //Helper Functions
 //Draw
-export function deal(playerId: player.PlayerNames, oldRound: Round): [Card | undefined, player.PlayerNames, Round] {
+export function deal(playerId: player.PlayerNames, oldRound: Round): [Card, player.PlayerNames, Round] {
   const [card, newDrawPile] = deck.deal(oldRound.drawPile)
 
   if (deck.size(newDrawPile) === 0) {
     const [shaflledDrawPile, shaffledDiscardPile] = deckFactory.createNewDecks(oldRound.discardPile)
-    return [card, playerId, { ...oldRound, drawPile: shaflledDrawPile, discardPile: shaffledDiscardPile }]
+    return [card!, playerId, { ...oldRound, drawPile: shaflledDrawPile, discardPile: shaffledDiscardPile }]
   }
 
-  return [card, playerId, { ...oldRound, drawPile: newDrawPile }]
+  return [card!, playerId, { ...oldRound, drawPile: newDrawPile }]
 }
 
 export function playerAction(card: Card, playerId: player.PlayerNames, oldRound: Round): Round {

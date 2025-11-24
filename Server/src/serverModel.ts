@@ -66,8 +66,9 @@ export function drawCard(oldGame: Game): Game {
     const desiredRound = oldGame.currentRound
     if(desiredRound) {
         const currentPlayer = desiredRound.currentPlayer
-        const newRound = round.draw(1, currentPlayer, desiredRound) //not sure if fine bcs current player is number but draw requires playerName
-        return {...oldGame, currentRound: newRound}
+        const newRound = round.draw(1, currentPlayer, desiredRound)
+        const skippedRound = round.skip(newRound)
+        return {...oldGame, currentRound: skippedRound}
     }
     return oldGame
 }
@@ -75,7 +76,7 @@ export function drawCard(oldGame: Game): Game {
 export function sayUno(playerId: number, oldGame: Game): Game {
     const desiredRound = oldGame.currentRound
     if(desiredRound) {
-        const newRound = round.sayUno(playerId, desiredRound) //not sure if fine bcs current player is number but sayUno requires playerName
+        const newRound = round.sayUno(playerId, desiredRound)
         return {...oldGame, currentRound: newRound}
     }
     return oldGame
@@ -84,7 +85,7 @@ export function sayUno(playerId: number, oldGame: Game): Game {
 export function accuseUno(accuser: number, accused: number, oldGame: Game): Game {
     const desiredRound = oldGame.currentRound
     if(desiredRound) {
-        const newRound = round.catchUnoFailure(accuser, accused, desiredRound)// number vs PlayerNames
+        const newRound = round.catchUnoFailure(accuser, accused, desiredRound)
         return {...oldGame, currentRound: newRound}
     }
     return oldGame

@@ -33,10 +33,10 @@ export const create_Resolvers = (pubsub: PubSub, api: GameAPI) => {
   return {
     Query: {
       activeGames: async () => {
-        return await api.getActiveGames();
+        return (await api.getActiveGames()).map(g => toGraphQLGame(g));
       },
       pendingGames: async () => {
-        return await api.getPendingGames();
+        return (await api.getPendingGames()).map(g => toGraphQLGame(g));
       },
     },
     Mutation: {
