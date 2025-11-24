@@ -15,7 +15,7 @@ import { makeExecutableSchema } from "@graphql-tools/schema";
 import { useServer } from "graphql-ws/use/ws";
 import { PubSub } from "graphql-subscriptions";
 import { createGameAPI } from "./api";
-import { create_Resolvers } from "./resolvers";
+import { create_Resolvers, toGraphQLGame } from "./resolvers";
 import { Game } from "Domain/src/model/Game";
 
 async function startServer(store: MemoryStore) {
@@ -26,22 +26,24 @@ async function startServer(store: MemoryStore) {
 
     gameAdded(game: Game) {
       const topic = game.currentRound ? ACTIVE_GAMES_FEED : PENDING_GAMES_FEED;
+      const graphqlGame = toGraphQLGame(game)
       pubsub.publish(topic, {
         [topic]: {
           action: 'ADDED',
           gameId: game.id,
-          game: game
+          game: graphqlGame
         }
       });
     },
 
     gameUpdated(game: Game) {
       const topic = game.currentRound ? ACTIVE_GAMES_FEED : PENDING_GAMES_FEED;
+      const graphqlGame = toGraphQLGame(game)
       pubsub.publish(topic, {
         [topic]: {
           action: 'UPDATED',
           gameId: game.id,
-          game: game
+          game: graphqlGame
         }
       });
     },
