@@ -15,7 +15,7 @@ export type Game = {
   readonly players: PlayerRef[];
   readonly currentRound?: Round;
   readonly targetScore: number;
-  readonly scores: Record<PlayerNames, number>;
+  readonly scores: Record<number, number>;
   readonly dealer: number;
   readonly roundHistory: [string, number][];
   readonly winner?: PlayerNames;
