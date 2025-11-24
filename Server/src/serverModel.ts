@@ -40,7 +40,8 @@ export function play(opts: {cardId: number, chosenColor?: string}, oldGame: Game
     const desiredRound = oldGame.currentRound
     if(desiredRound) {
         const newRound = round.playIfAllowed({cardId: opts.cardId, color: opts.chosenColor as Colors}, desiredRound)
-        return {...oldGame, currentRound: newRound}
+        const newGame = {...oldGame, currentRound: newRound}
+        return game.roundFinished(newGame)
     }
     return oldGame
 }

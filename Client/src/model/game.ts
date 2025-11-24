@@ -21,7 +21,7 @@ export type GameSpecs = Readonly<{
     scores: Record<PlayerNames, Number>
     dealer: number
     winner?: PlayerNames | undefined;
-    roundHistory?: [string, number][]
+    roundHistory: [string, number][]
 }>
 
 export type RoundSpecs = Readonly<{

@@ -135,9 +135,8 @@ const GameStatus = ({
       .sort((a, b) => b.score - a.score)
   }, [game?.players, game?.scores])
 
-  const roundHistory = game?.roundHistory ?? []
 
-  return (
+  return (game &&
     <div className='gamestatus'>
       <div className={`timer ${isCritical ? 'critical' : ''}`}>
         Time Left: {timer}s
@@ -148,11 +147,11 @@ const GameStatus = ({
       <div className='Rounds'>
         <h1>Round History</h1>
         <div className='round-List'>
-          {roundHistory.map(([winner, points], index) => (
+          {game.roundHistory.map(([winner, points], index) => (
             <div
               key={`${winner}-${index}`}
               className={`player ${
-                index === roundHistory.length - 1 ? 'current' : ''
+                index === game.roundHistory.length - 1 ? 'current' : ''
               }`}
             >
               <span className='rank'>Round {index + 1}:</span>

@@ -109,8 +109,8 @@ export function createRound(g: Game): Game {
     currentRound: round,
   };
 }
-export function calculatePoints(round: Round): number {
 
+function calculatePoints(round: Round): number {
   const totalPoints = round.players.reduce((sum, player) => {
     const handPoints = player.hand?.reduce((pts, card) => {
       switch (card!.Type) {
