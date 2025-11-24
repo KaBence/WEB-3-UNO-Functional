@@ -1,5 +1,5 @@
 import * as game from "domain/src/model/Game"
-import * as round from "domain/src/model/round"
+import * as round from "domain/src/model/Round"
 import * as gameFactory from "domain/src/model/gameFactory"
 import { Card, Colors } from "domain/src/model/Card"
 

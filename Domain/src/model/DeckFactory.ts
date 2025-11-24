@@ -1,6 +1,6 @@
 import * as CardFactory from "./CardFactory";
 import { Cards, Card , Type} from "./Card";
-import { Deck, DeckTypes } from "./deck";
+import { Deck, DeckTypes } from "./Deck";
 import { standardShuffler } from "../utils/random_utils";
 import * as _ from "lodash";
 
