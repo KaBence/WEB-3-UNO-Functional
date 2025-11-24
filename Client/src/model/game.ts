@@ -1,6 +1,6 @@
 import type { Colors, Type, CardNumber } from "Domain/src/model/Card"
 import type { PlayerNames } from "Domain/src/model/Player"
-import type { Direction } from "Domain/src/model/round"
+import type { Direction } from "Domain/src/model/Round"
 
 export type PlayerSpecs = Readonly<{
     name: string

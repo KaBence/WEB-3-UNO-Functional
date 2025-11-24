@@ -3,7 +3,7 @@ import * as _ from "lodash";
 import * as card from "./Card"
 import * as cardFactory from "./CardFactory"
 import * as deckFactory from "./DeckFactory"
-import * as deck from "./deck";
+import * as deck from "./Deck";
 import * as player from "./Player";
 
 export enum Direction {
