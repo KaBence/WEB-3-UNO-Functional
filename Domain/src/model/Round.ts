@@ -380,7 +380,7 @@ export function handleSpecialCards(opts: { playedCard: Card, color?: card.Colors
     case card.Type.Reverse:
       return changeDirection(round)
     case card.Type.Draw:
-      return draw(2, round.currentPlayer, round)
+      return draw(2, getNextPlayer(round), round)
     case card.Type.Wild:
       return addCardToDiscardPile(cardFactory.CreateDummyCard(opts.color!), round)
     case card.Type.WildDrawFour:
