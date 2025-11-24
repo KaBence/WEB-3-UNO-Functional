@@ -1,8 +1,8 @@
 import { useSelector, useDispatch } from "react-redux";
 import Popup from "./Popup";
 import type { State, Dispatch } from "../../stores/store";
-import { playCard } from "../../thunks/PopupThunk";
-import { Colors } from "domain/src/model/Card";
+import {chooseColor} from '../../thunks/PopupThunk'
+import { Colors } from "Domain/src/model/Card";
 
 interface ChooseColorPopupProps {
   gameId: number;
@@ -13,8 +13,8 @@ const ChooseColorPopup = ({ gameId, cardIndex }:ChooseColorPopupProps) => {
   const dispatch = useDispatch<Dispatch>();
   const { showColorChange } = useSelector((state: State) => state.popups);
 
-  const handleChooseColor = async (color: Colors) => {
-    await playCard(gameId, cardIndex, color.toString(), dispatch);
+  const handleChooseColor = async (color: string) => {
+    await chooseColor(gameId, cardIndex, color, dispatch)
   };
 
   return (
