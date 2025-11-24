@@ -116,12 +116,7 @@ const Game = () => {
     <div className='game-view'>
       <div className='game-board-area'>
         <div className='status-bar'>
-          <StatusBar
-            message={statusMessage}
-            isYourTurn={isMyTurn}
-            arrowAngle={180}
-            score={120}
-          />
+          <StatusBar message={statusMessage} isYourTurn={true} score={120} />
         </div>
         <div className='player-bar'>
           <PlayersBar

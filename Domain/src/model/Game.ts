@@ -1,12 +1,12 @@
 
 import type { Round } from "./Round";
 import * as RoundFactory from "./RoundFactory";
+import * as deck from "./Deck"
 import * as DeckFactory from "./DeckFactory";
-import type { PlayerId, PlayerRef } from "./Player";
+import type { PlayerNames, PlayerRef } from "./Player";
 import * as playerFactory from "./PlayerFactory"
-import { Card, Type } from "./Card";
-import { Deck, deal, shuffle, DeckTypes } from "./Deck";
-import {getRoundWinner as roundHasWinner,} from "./Round";
+import { Type } from "./Card";
+import { getRoundWinner as roundHasWinner, } from "./Round";
 
 
 
@@ -15,10 +15,10 @@ export type Game = {
   readonly players: PlayerRef[];
   readonly currentRound?: Round;
   readonly targetScore: number;
-  readonly scores: Record<PlayerId, number>;
+  readonly scores: Record<number, number>;
   readonly dealer: number;
   readonly roundHistory: [string, number][];
-  readonly winner?: PlayerId;
+  readonly winner?: PlayerNames;
 };
 
 export function addPlayer(name: string, g: Game): Game {
@@ -30,7 +30,7 @@ export function addPlayer(name: string, g: Game): Game {
   };
 }
 
-export function removePlayer(playerId: PlayerId, g: Game): Game {
+export function removePlayer(playerId: PlayerNames, g: Game): Game {
   const players = g.players.filter(p => p.playerName !== playerId);
   if (players.length === g.players.length) return g;
   const { [playerId]: _drop, ...rest } = g.scores;
@@ -43,39 +43,41 @@ export function removePlayer(playerId: PlayerId, g: Game): Game {
         ? players.length - 1
         : g.dealer;
 
-  return { ...g, players, scores: rest as Record<PlayerId, number>, currentRound, dealer };
+  return { ...g, players, scores: rest as Record<PlayerNames, number>, currentRound, dealer };
 }
 
 
 
 
 export function selectDealerBy(g: Game): Game {
-  const { dealer } = g.players.reduce(
-    (state, _player, index) => {
-      const [card, nextDeck] = deal(state.deck);
-      switch (card!.Type) {
-        case Type.Skip:
-        case Type.Reverse:
-        case Type.Draw:
-        case Type.Wild:
-        case Type.WildDrawFour:
-        case Type.Numbered:
-          return card!.Points > state.bestScore
-            ? { deck: nextDeck, bestScore: card!.Points, dealer: index }
-            : { ...state, deck: nextDeck };
-        case Type.Dummy:
-        case Type.DummyDraw4:
-          return { ...state, deck: nextDeck };
-      }
-    },
-    {
-      deck: DeckFactory.createNewDrawDeck(),
-      bestScore: -Infinity,
-      dealer: 0,
-    }
-  );
+  let drawPile = DeckFactory.createNewDrawDeck();
+  let playersWithCards = g.players.map((ref) => playerFactory.createPlayer(ref.playerName, ref.name))
 
-  return { ...g, dealer };
+  let bestPlayer = 0;
+  let bestScore = 0;
+
+  for (let idx = 0; idx < playersWithCards.length; idx++) {
+    const [dealtCard, nextDeck] = deck.deal(drawPile);
+    drawPile = nextDeck;
+    switch (dealtCard!.Type) {
+      case Type.Skip:
+      case Type.Reverse:
+      case Type.Draw:
+      case Type.Wild:
+      case Type.WildDrawFour:
+      case Type.Numbered:
+        if (dealtCard!.Points > bestScore) {
+          bestPlayer = idx
+        }
+        break;
+      case Type.Dummy:
+      case Type.DummyDraw4:
+        throw new Error("Problem during selectDealerBy in Game")
+    }
+  }
+
+  return { ...g, dealer: bestPlayer }
+
 }
 
 
@@ -107,8 +109,8 @@ export function createRound(g: Game): Game {
     currentRound: round,
   };
 }
-export function calculatePoints(round: Round): number {
 
+function calculatePoints(round: Round): number {
   const totalPoints = round.players.reduce((sum, player) => {
     const handPoints = player.hand?.reduce((pts, card) => {
       switch (card!.Type) {
@@ -133,8 +135,8 @@ export function roundFinished(g: Game): Game {
   const r = g.currentRound;
   if (!r || !roundHasWinner(r)) return g;
 
-  const wId = roundHasWinner(r).winner?.playerName;
-  const wName = roundHasWinner(r).winner?.name;
+  const wId = roundHasWinner(r).winner;
+  const wName = g.players.filter(p => p.playerName !== wId)[0].name
   if (wId === undefined || !wName) return g;
 
   //here we are missing calculate points function
@@ -143,12 +145,12 @@ export function roundFinished(g: Game): Game {
   const roundHistory = [...g.roundHistory, [wName, pts] as [string, number]];
 
   const winner = (Object.entries(scores) as Array<[string, number]>).reduce<
-    PlayerId | undefined
+    PlayerNames | undefined
   >(
     (currentWinner, [idStr, sc]) =>
       currentWinner !== undefined || sc < g.targetScore
         ? currentWinner
-        : (Number(idStr) as PlayerId),
+        : (Number(idStr) as PlayerNames),
     g.winner
   );
 

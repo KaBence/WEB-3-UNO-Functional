@@ -1,9 +1,7 @@
 import * as api from '../model/api'
 
-import type { Dispatch } from '../stores/store'
-
 // Removal is propagated via server subscription; no local state mutation needed here.
-export const removePlayerThunk = (gameId: number, playerId: number) => async (_dispatch: Dispatch) => {
+export const removePlayerThunk = (gameId: number, playerId: number) => async () => {
   try {
    await api.removePlayer(gameId, playerId)
     

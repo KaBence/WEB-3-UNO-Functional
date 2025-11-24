@@ -39,11 +39,6 @@
     box-shadow: 0 0 10px rgba(40, 167, 69, 0.8);
 }
 
-.arrow {
-    width: 50px;
-    height: 100%;
-}
-
 .score {
     font-size: 16px;
     font-weight: bold;
