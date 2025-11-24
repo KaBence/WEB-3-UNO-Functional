@@ -28,56 +28,10 @@ import { Direction } from 'Domain/src/model/round'
 import { Colors, Type } from 'Domain/src/model/Card'
 
 //Store and thunks should we have thunks here?
-import type { Dispatch } from "../stores/store";
 import DrawCardThunk from '../thunks/DrawCardThunk'
 import PlayCardThunk from '../thunks/PlayCardThunk'
 import CanPlayThunk from '../thunks/CanPlayThunk'
 import UnoCallThunk from '../thunks/UnoCallThunk'
-
-//Test purposes
-import type { AnyAction } from "@reduxjs/toolkit";
-
-const mockPlayers = [
-  {
-    name: "Alice",
-    unoCalled: false,
-    playerName: PlayerNames.player1,
-    hand: [
-      { type: Type.Numbered, color: Colors.Red, number: 5 as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 },
-      { type: Type.Numbered, color: Colors.Blue, number: 7 as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 },
-      { type: Type.Numbered, color: Colors.Green, number: 2 as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 },
-    ],
-  },
-  {
-    name: "Bob",
-    unoCalled: false,
-    playerName: PlayerNames.player2,
-    hand: [
-      { type: Type.Numbered, color: Colors.Yellow, number: 1 as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 },
-      { type: Type.Numbered, color: Colors.Red, number: 3 as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 },
-    ],
-  },
-];
-
-
-const mockDispatch: Dispatch = ((action: AnyAction | any) => {
-  console.log("dispatch called:", action);
-  return action;
-}) as Dispatch;
-
-const placeholderRound: RoundSpecs = {
-  players: [] as PlayerSpecs[],
-  drawDeckSize: 0,
-  topCard: {
-    type: Type.Numbered,
-    color: Colors.Green,
-    number: 0
-  },
-  currentDirection: Direction.Clockwise,
-  winner: PlayerNames.player1,
-  currentPlayer: PlayerNames.player1,
-  statusMessage: 'Waiting for a game...'
-}
 
 const Game = () => {
   const { id } = useParams<{ id?: string }>()
@@ -96,21 +50,35 @@ const Game = () => {
 
   const myPlayer = useMemo(() => {
     if (!round || round.players.length === 0) return undefined
-    if (player.playerName) {
-      return round.players.find((p) => p.playerName === player.playerName) ?? undefined
+    // Prefer matching by numeric player id; fall back to display name
+    const byId = player.playerName
+      ? round.players.find((p) => p.playerName === player.playerName)
+      : undefined
+    if (byId) return byId
+    if (player.player) {
+      const byName = round.players.find((p) => p.name === player.player)
+      if (byName) return byName
     }
-    return undefined
+    // Fallback to first player so UI remains interactive during setup/debug
+    return round.players[0]
   }, [player, round])
 
   const myHand: CardSpecs[] = myPlayer?.hand ?? []
   const statusMessage = round?.statusMessage ?? 'Waiting for players...'
   const currentDirection = round?.currentDirection ?? Direction.Clockwise
-  const topCard = round?.topCard ?? placeholderRound.topCard
+  const topCard = round?.topCard
 
-  const isMyTurn = Boolean(game && round) && round!.currentPlayer === player.playerName
+  const isMyTurn = Boolean(round && myPlayer) && round?.currentPlayer === myPlayer?.playerName
 
   const handleDraw = useCallback(() => {
-    if (!game || !round || !myPlayer || !isMyTurn) return
+    if (!game || !round || !myPlayer) {
+   
+      return
+    }
+    if (!isMyTurn) {
+     
+      return
+    }
     dispatch(DrawCardThunk(game.id))
   }, [dispatch, game, round, myPlayer, isMyTurn])
 
@@ -133,15 +101,13 @@ const Game = () => {
         console.error('Unable to play card', error)
       }
     },
-    [game, round, myPlayer, dispatch, dispatch]
+    [game, round, myPlayer, dispatch, isMyTurn]
   )
 
   const handleUno = useCallback(() => {
     if (!game || !myPlayer) return
     dispatch(UnoCallThunk(game.id, myPlayer.playerName))
   }, [dispatch, game, myPlayer])
-
-  const boardRound = round ?? placeholderRound
 
   return (
     <div className='game-view'>
@@ -150,12 +116,17 @@ const Game = () => {
           <StatusBar message={statusMessage} isYourTurn={true} arrowAngle={180} score={120} />
         </div>
         <div className='player-bar'>
-          <PlayersBar players={mockPlayers} gameId={1} currentPlayerId={1} dispatch={mockDispatch} />
+          <PlayersBar
+            players={round?.players ?? []}
+            gameId={game?.id ?? 0}
+            currentPlayerId={player.playerName ?? PlayerNames.player1}
+            dispatch={dispatch}
+          />
         </div>
         <section className='tabletop'>
           <div className='pile-section'>
             <DrawPile
-              cardsLeft={boardRound.drawDeckSize}
+              cardsLeft={round?.drawDeckSize ?? 0}
               onDraw={handleDraw}
             />
             <span className='pile-label'>Draw pile</span>
@@ -163,7 +134,7 @@ const Game = () => {
 
           <div className='table-info'>
             <div className='direction-pill'>Direction: {currentDirection}</div>
-            <div className='deck-size'>Cards left: {boardRound.drawDeckSize}</div>
+            <div className='deck-size'>Cards left: {round?.drawDeckSize ?? 0}</div>
           </div>
 
           <div className='pile-section'>
@@ -178,20 +149,22 @@ const Game = () => {
             <span className='cards-count'>{myHand.length} cards</span>
           </div>
           <PlayerHand cards={myHand} onPlay={handlePlay} />
-          <div className='uno-button-wrapper'>
-            <UnoButton onClick={handleUno}>
-              Call UNO
-            </UnoButton>
-          </div>
         </section>
-      </div>
-      <div>
 
+        <div className='uno-button-wrapper'>
+          <UnoButton onClick={handleUno}>
+            Call UNO
+          </UnoButton>
+        </div>
       </div>
-      <GameStatus
-        game={game}
-        myPlayerId={player.playerName ?? PlayerNames.player1}
-      />
+
+      <aside className='side-panel'>
+        <GameStatus
+          game={game}
+          myPlayerId={player.playerName ?? PlayerNames.player1}
+        />
+      </aside>
+
       <PlayPopup gameId={1} cardIndex={0} newCard={{ type: Type.Numbered, color: Colors.Red, number: 7 }} />
       <ChooseColorPopup gameId={1} cardIndex={1} />
       <ChallengePopup gameId={1} />

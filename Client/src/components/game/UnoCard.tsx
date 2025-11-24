@@ -1,105 +1,108 @@
-import { useMemo } from 'react'
-import type { CSSProperties, MouseEventHandler } from 'react'
-import { Type } from 'Domain/src/model/Card'
-import type { CardSpecs } from '../../model/game'
-import './UnoCard.css'
+import { useMemo } from 'react';
+import type { CSSProperties, MouseEventHandler } from 'react';
+import { Type } from 'Domain/src/model/Card';
+import type { CardSpecs } from '../../model/game';
+import './UnoCard.css';
 
 type UnoCardProps = {
-  card: CardSpecs
-  className?: string
-  style?: CSSProperties
-  onClick?: MouseEventHandler<HTMLDivElement>
-}
+  card: CardSpecs;
+  className?: string;
+  style?: CSSProperties;
+  onClick?: MouseEventHandler<HTMLDivElement>;
+};
 
 const UnoCard = ({ card, className, style, onClick }: UnoCardProps) => {
+  // Normalize server payload keys (Type/Color/CardNumber) to local expectations
+  const type = (card as any).type ?? (card as any).Type;
+  const color = (card as any).color ?? (card as any).Color;
+  const number = (card as any).number ?? (card as any).CardNumber;
+
   const isWild = useMemo(
-    () => card.type === Type.Wild || card.type === Type.WildDrawFour,
-    [card.type]
-  )
+    () => type === Type.Wild || type === Type.WildDrawFour,
+    [type]
+  );
 
   const isDummy = useMemo(
-    () => card.type === Type.Dummy || card.type === Type.DummyDraw4,
-    [card.type]
-  )
+    () => type === Type.Dummy || type === Type.DummyDraw4,
+    [type]
+  );
 
   const showCorners = useMemo(
-    () => card.type === Type.Numbered || card.type === Type.Draw,
-    [card.type]
-  )
+    () => type === Type.Numbered || type === Type.Draw,
+    [type]
+  );
 
   const mainLabel = useMemo(() => {
-    switch (card.type) {
+    switch (type) {
       case Type.Numbered:
-        return (card.number ?? '').toString()
+        return (number ?? '').toString();
       case Type.Draw:
-        return '+2'
+        return '+2';
       case Type.Skip:
-        return 'SKIP'
+        return 'SKIP';
       case Type.Reverse:
-        return '⇄'
+        return 'REV';
       default:
-        return ''
+        return '';
     }
-  }, [card.number, card.type])
+  }, [number, type]);
 
   const cornerLabel = useMemo(() => {
-    switch (card.type) {
+    switch (type) {
       case Type.Numbered:
-        return card.number?.toString() ?? ''
+        return number?.toString() ?? '';
       case Type.Draw:
-        return '+2'
+        return '+2';
       default:
-        return ''
+        return '';
     }
-  }, [card.number, card.type])
+  }, [number, type]);
 
   const colorClass = useMemo(() => {
-    if (isWild || isDummy) return 'card-black'
-    const colorName = (card.color ?? 'BLACK').toLowerCase()
-    return `card-${colorName}`
-  }, [card.color, isDummy, isWild])
+    if (isWild || isDummy) return 'card-black';
+    const colorName = (color ?? 'BLACK').toLowerCase();
+    return `card-${colorName}`;
+  }, [color, isDummy, isWild]);
 
-  const classNames = ['uno-card', colorClass, className]
-    .filter(Boolean)
-    .join(' ')
+  const classNames = ['uno-card', colorClass, className].filter(Boolean).join(' ');
 
   return (
     <div className={classNames} style={style} onClick={onClick}>
       {showCorners && cornerLabel && (
         <>
-          <span className='corner top-left'>{cornerLabel}</span>
-          <span className='corner bottom-right'>{cornerLabel}</span>
+          <span className="corner top-left">{cornerLabel}</span>
+          <span className="corner bottom-right">{cornerLabel}</span>
         </>
       )}
 
-      {isWild && card.type === Type.WildDrawFour && (
+      {isWild && type === Type.WildDrawFour && (
         <>
-          <span className='corner top-left'>+4</span>
-          <span className='corner bottom-right'>+4</span>
+          <span className="corner top-left">+4</span>
+          <span className="corner bottom-right">+4</span>
         </>
       )}
 
-      {card.type === Type.DummyDraw4 && (
+      {type === Type.DummyDraw4 && (
         <>
-          <span className='corner top-left'>+4</span>
-          <span className='corner bottom-right'>+4</span>
+          <span className="corner top-left">+4</span>
+          <span className="corner bottom-right">+4</span>
         </>
       )}
 
-      <div className='center-oval'>
-        {mainLabel && <span className='center-text'>{mainLabel}</span>}
+      <div className="center-oval">
+        {mainLabel && <span className="center-text">{mainLabel}</span>}
 
         {(isWild || isDummy) && (
-          <div className='wild-symbol' aria-hidden='true'>
-            <div className='wild-square red' />
-            <div className='wild-square yellow' />
-            <div className='wild-square green' />
-            <div className='wild-square blue' />
+          <div className="wild-symbol" aria-hidden="true">
+            <div className="wild-square red" />
+            <div className="wild-square yellow" />
+            <div className="wild-square green" />
+            <div className="wild-square blue" />
           </div>
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default UnoCard
+export default UnoCard;
