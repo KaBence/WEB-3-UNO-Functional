@@ -1,7 +1,7 @@
 import './Game.css'
 
 //React stuff
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useMemo, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams, useNavigate } from 'react-router-dom'
 
