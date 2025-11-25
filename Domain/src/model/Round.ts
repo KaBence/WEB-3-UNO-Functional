@@ -275,7 +275,6 @@ export function challengeWildDrawFour(isChallenged: boolean, oldRound: Round): [
     return [false, { ...newRound, statusMessage: message, currentPlayer: getNextPlayer(newRound) }];
   }
   const flag = couldPlayInsteadofDrawFour(oldRound)
-  console.log(flag)
   if (flag) {
     const newRound = draw(4, getPreviousPlayer(oldRound), oldRound)
     const message = getSpecificPlayer(newRound.currentPlayer, newRound).name + " challenged successfully"
