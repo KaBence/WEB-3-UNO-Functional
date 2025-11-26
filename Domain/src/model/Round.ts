@@ -109,7 +109,7 @@ export function catchUnoFailure(accuser: player.PlayerNames, accused: player.Pla
     return { ...updated, statusMessage: newMessage }
   }
   else {
-    const updated = draw(6, accuser, oldRound)
+    const updated = draw(4, accuser, oldRound)
     const newMessage = message + " wrongly"
     return { ...updated, statusMessage: newMessage }
   }
@@ -385,7 +385,10 @@ export function handleSpecialCards(opts: { playedCard: Card, color?: card.Colors
     case card.Type.Reverse:
       return changeDirection(round)
     case card.Type.Draw:
-      return draw(2, getNextPlayer(round), round)
+      // Penalize the next player and set turn to them so skip() advances past them
+      const penalizedPlayer = getNextPlayer(round)
+      const withPenalty = draw(2, penalizedPlayer, round)
+      return { ...withPenalty, currentPlayer: penalizedPlayer }
     case card.Type.Wild:
       return addCardToDiscardPile(cardFactory.CreateDummyCard(opts.color!), round)
     case card.Type.WildDrawFour:
