@@ -59,10 +59,10 @@ const UnoCard = ({ card, className, style, onClick }: UnoCardProps) => {
   }, [number, type]);
 
   const colorClass = useMemo(() => {
-    if (isWild || isDummy) return 'card-black';
+    if (isWild) return 'card-black';
     const colorName = (color ?? 'BLACK').toLowerCase();
     return `card-${colorName}`;
-  }, [color, isDummy, isWild]);
+  }, [color, isWild]);
 
   const classNames = ['uno-card', colorClass, className].filter(Boolean).join(' ');
 

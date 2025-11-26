@@ -1,6 +1,6 @@
 import * as api from '../model/api'
 
-const CanPlayThunk = (gameId: number, cardId: number) => async () => {
+const CanPlayThunk = (gameId: number, cardId: number) => async (): Promise<boolean> => {
   try {
     return await api.canPlay(gameId, cardId)
   } catch (error) {

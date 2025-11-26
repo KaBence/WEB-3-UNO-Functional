@@ -2,8 +2,6 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { CardSpecs } from "../model/game";
 import { PlayerNames } from "domain/src/model/Player";
 
-export type Popups = "Play" | "ColorChange" | "Challenge" | "ChallengeResult";
-
 export interface ChallengeContext {
   challengedPlayer: PlayerNames;
   handBeforeDraw: CardSpecs[];
@@ -17,13 +15,9 @@ export interface PopupState {
   challengeResult: boolean;
   colorSelected: string;
   challengeContext?: ChallengeContext;
+  cardToPlay: number
 }
 
-// Test mocks
-import { Type, Colors } from "domain/src/model/Card";
-const mockCard: CardSpecs = { type: Type.Numbered, number: 7, color: Colors.Blue };
-const mockCard2: CardSpecs = { type: Type.Numbered, number: 7, color: Colors.Red };
-const mock: ChallengeContext = { challengedPlayer: PlayerNames.player1, handBeforeDraw: [mockCard, mockCard2] };
 
 const initialState: PopupState = {
   showChallenge: false,
@@ -33,6 +27,7 @@ const initialState: PopupState = {
   challengeResult: false,
   colorSelected: "",
   challengeContext: undefined,
+  cardToPlay: 0
 };
 
 const popupReducers = {
@@ -62,8 +57,8 @@ const popupReducers = {
   closeChallengeResult(state: PopupState) {
     return { ...state, showChallengeResult: false, challengeContext: undefined };
   },
-  openColorChange(state: PopupState) {
-    return { ...state, showColorChange: true };
+  openColorChange(state: PopupState, card: PayloadAction<number>) {
+    return { ...state, showColorChange: true , cardToPlay: card.payload};
   },
   closeColorChange(state: PopupState) {
     return { ...state, showColorChange: false };

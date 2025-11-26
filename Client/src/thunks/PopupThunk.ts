@@ -2,6 +2,22 @@ import * as api from "../model/api";
 import { active_games_slice } from "../slices/active_games_slice";
 import { popup_slice } from "../slices/popup_slice";
 import type { Dispatch, GetState } from "../stores/store";
+import PlayCardThunk from '../thunks/PlayCardThunk'
+
+export const openPopup = (opts: {popup: string, card?: number}, dispatch: Dispatch) => {
+  switch (opts.popup) {
+    case "ChooseColor":
+      dispatch(popup_slice.actions.closePlay())
+      dispatch(popup_slice.actions.openColorChange(opts.card!))
+      return
+    case "Play":
+      dispatch(popup_slice.actions.openPlay())
+      return
+    case "Challenge":
+      dispatch(popup_slice.actions.openChallenge())
+      return
+  }
+}
 
 export const challengeTrue = (gameId: number) => 
   async (dispatch: Dispatch, getState: GetState) => {
@@ -14,6 +30,7 @@ export const challengeTrue = (gameId: number) =>
     const challenged = round!.players[challengedIdx];
 
     const handSnapshot = challenged.hand.map(c => ({ ...c }));
+    dispatch(popup_slice.actions.closeChallenge())
 
     dispatch(
       popup_slice.actions.openChallengeResultSnapshot({
@@ -42,34 +59,25 @@ export const challengeFalse = (gameId: number) =>
 export const playCard = async (
   gameId: number,
   index: number,
-  color: string | undefined,
   dispatch: Dispatch
 ) => {
-  const updatedGame =
-    color != undefined
-      ? await api.play(gameId, index, color)
-      : await api.play(gameId, index);
-
-  dispatch(active_games_slice.actions.upsert(updatedGame));
+  await dispatch(PlayCardThunk({gameId: gameId, cardId: index}))
 };
 
 
 export const drawCard = async (gameId: number, dispatch: Dispatch) => {
-  const updatedGame = await api.play(gameId, -1);
-  dispatch(active_games_slice.actions.upsert(updatedGame));
+  await dispatch(PlayCardThunk({gameId: gameId, cardId: -1}))
 };
 
 
 export const chooseColor = async (
   gameId: number,
-  cardIndex: number,
+  cardId: number,
   color: string,
-  dispatch: Dispatch
+  dispatch: Dispatch,
 ) => {
   dispatch(popup_slice.actions.setColorSelected(color));
-
-  const updatedGame = await api.play(gameId, cardIndex, color);
-
+  await dispatch(PlayCardThunk({gameId: gameId, cardId: cardId, chosenColor: color}))
   dispatch(popup_slice.actions.closeColorChange());
-  dispatch(active_games_slice.actions.upsert(updatedGame));
 };
+

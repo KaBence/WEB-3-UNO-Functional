@@ -20,10 +20,8 @@ const ChallengeResultPopup = () => {
     (state: State) => state.popups
   );
 
-  if (!challengeContext) return null;
+  if (!challengeContext) return undefined;
 
-  //const hand = challengeContext?.handBeforeDraw ?? [];
-  //we should call <Playerhand with this hand
 
   return (
     <Popup
@@ -32,14 +30,14 @@ const ChallengeResultPopup = () => {
       actions={[
         {
           label: "Ok",
-          onClick: () => dispatch(popup_slice.actions.closeChallenge()),
+          onClick: () => dispatch(popup_slice.actions.closeChallengeResult()),
         },
       ]}
     >
     <div className='player-hand'>
       {challengeContext.handBeforeDraw.map((card, index) => (
         <UnoCard
-          key={`${card.type}-${card.color ?? ''}-${card.number ?? ''}-${index}`}
+          key={`${card.Type}-${card.Color ?? ''}-${card.CardNumber ?? ''}-${index}`}
           card={card}
           className='hand-card'
           style={cardStyle(index, challengeContext.handBeforeDraw.length)}

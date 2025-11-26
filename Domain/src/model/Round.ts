@@ -210,46 +210,51 @@ function getPreviousPlayer(oldRound: Round): player.PlayerNames {
   function couldPlayInsteadofDrawFour(oldRound: Round): boolean {
     const hand = getSpecificPlayer(getPreviousPlayer(oldRound),oldRound).hand
 
-    const topCard = getTopCard(oldRound)
+    //const topCard = getTopCard(oldRound) <- this is giving us dummy and we want one card before dummy
+    const topCard = oldRound.discardPile.cards[oldRound.discardPile.cards.length-3] //aparently we are adding adding wild card and then dummy: sequence from the back [DUMMY -> WILD DRAW -> top card that we are intereted in]
     for (let i = 0; i < hand.length; i++) {
       const cardToCheck = hand[i];
       switch (cardToCheck.Type) {
         case card.Type.Reverse:
         case card.Type.Draw:
         case card.Type.Skip:
-          switch (topCard.Type) {
+          switch (topCard!.Type) {
             case card.Type.Wild:
             case card.Type.WildDrawFour:
               break;
             case card.Type.Skip:
             case card.Type.Reverse:
             case card.Type.Draw:
-              if(topCard.Type === cardToCheck.Type || topCard.Color === cardToCheck.Color)
+              if(topCard!.Type === cardToCheck.Type || topCard!.Color === cardToCheck.Color){
                 return true
+              }
               break;
             case card.Type.Numbered:
             case card.Type.Dummy:
             case card.Type.DummyDraw4:
-              if(topCard.Color === cardToCheck.Color)
+              if(topCard!.Color === cardToCheck.Color){
                 return true;
+              }
               break;
           }
         case card.Type.Wild:
         case card.Type.WildDrawFour:
           break;
         case card.Type.Numbered:
-          switch (topCard.Type) {
+          switch (topCard!.Type) {
             case card.Type.Skip:
             case card.Type.Reverse:
             case card.Type.Draw:
             case card.Type.Dummy:
             case card.Type.DummyDraw4:
-              if(topCard.Color === cardToCheck.Color)
+              if(topCard!.Color === cardToCheck.Color){
                 return true;
+              }
               break;
             case card.Type.Numbered:
-              if(topCard.CardNumber === cardToCheck.CardNumber || topCard.Color === cardToCheck.Color)
-                return true;
+              if(topCard!.CardNumber === cardToCheck.CardNumber || topCard!.Color === cardToCheck.Color){
+                return true
+              }
               break;
             case card.Type.Wild:
             case card.Type.WildDrawFour:
@@ -269,8 +274,8 @@ export function challengeWildDrawFour(isChallenged: boolean, oldRound: Round): [
     const message = getSpecificPlayer(newRound.currentPlayer, newRound).name + " did not challenge"
     return [false, { ...newRound, statusMessage: message, currentPlayer: getNextPlayer(newRound) }];
   }
-
-  if (!couldPlayInsteadofDrawFour(oldRound)) {
+  const flag = couldPlayInsteadofDrawFour(oldRound)
+  if (flag) {
     const newRound = draw(4, getPreviousPlayer(oldRound), oldRound)
     const message = getSpecificPlayer(newRound.currentPlayer, newRound).name + " challenged successfully"
     return [true, { ...newRound, statusMessage: message }];
