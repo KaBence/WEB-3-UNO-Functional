@@ -109,7 +109,7 @@ export function catchUnoFailure(accuser: player.PlayerNames, accused: player.Pla
     return { ...updated, statusMessage: newMessage }
   }
   else {
-    const updated = draw(6, accuser, oldRound)
+    const updated = draw(4, accuser, oldRound)
     const newMessage = message + " wrongly"
     return { ...updated, statusMessage: newMessage }
   }
