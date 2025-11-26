@@ -385,7 +385,10 @@ export function handleSpecialCards(opts: { playedCard: Card, color?: card.Colors
     case card.Type.Reverse:
       return changeDirection(round)
     case card.Type.Draw:
-      return draw(2, getNextPlayer(round), round)
+      // Penalize the next player and set turn to them so skip() advances past them
+      const penalizedPlayer = getNextPlayer(round)
+      const withPenalty = draw(2, penalizedPlayer, round)
+      return { ...withPenalty, currentPlayer: penalizedPlayer }
     case card.Type.Wild:
       return addCardToDiscardPile(cardFactory.CreateDummyCard(opts.color!), round)
     case card.Type.WildDrawFour:
