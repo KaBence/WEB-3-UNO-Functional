@@ -1,7 +1,7 @@
 // gameFactory.ts — constructors & policies
 import type { Game } from "./Game";
 
-export function newGame(id: number, targetScore = 500): Game {
+export function newGame(id: number, targetScore = 1): Game {
   return {
     id,
     players: [],
