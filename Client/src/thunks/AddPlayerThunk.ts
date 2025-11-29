@@ -10,7 +10,7 @@ export const addPlayerThunk = (gameId: number, playerName: string) => async (dis
 
     const me = updatedGame?.players?.find((p: { name: string; playerName?: string }) => p.name === playerName)
     if (me?.playerName !== undefined) {
-      dispatch(player_slice.actions.joinGame(me.playerName))
+    dispatch(player_slice.actions.joinGame(me.playerName))
     } else {
       console.warn(`Joined game ${gameId} but could not determine player id for ${playerName}`)
     }

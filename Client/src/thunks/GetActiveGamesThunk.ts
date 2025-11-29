@@ -1,6 +1,5 @@
 import * as api from '../model/api'
 import { active_games_slice } from '../slices/active_games_slice'
-import { pending_games_slice} from '../slices/pending_games_slice'
 import type { Dispatch } from '../stores/store'
 
 export default async (dispatch: Dispatch) => {
