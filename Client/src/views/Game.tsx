@@ -30,7 +30,7 @@ import { Type } from 'Domain/src/model/Card'
 //Thunks
 import DrawCardThunk from '../thunks/DrawCardThunk'
 import PlayCardThunk from '../thunks/PlayCardThunk'
-import CanPlayThunk from '../thunks/CanPlayThunk'
+
 import UnoCallThunk from '../thunks/UnoCallThunk'
 import { startRoundThunk } from '../thunks/StartRoundThunk'
 import { removePlayerThunk } from '../thunks/RemovePlayerThunk'
@@ -66,18 +66,7 @@ const Game = () => {
 
   const isMyTurn = Boolean(round && myPlayer) && round?.currentPlayer === myPlayer?.playerName
 
-  const drawWithPopup = async () => {
-    dispatch(DrawCardThunk(game!.id))
 
-    const result = await dispatch(CanPlayThunk(game?.id!, myHand.length-1))
-    console.log(result)
-    if(result) {
-      PopupThunk.openPopup({popup: "Play"}, dispatch)
-    }
-    else {
-      dispatch(PlayCardThunk({gameId: game?.id!, cardId: -1}))
-    }
-  }
 
   const handleDraw = useCallback(() => {
     if (!game || !round || !myPlayer) {
